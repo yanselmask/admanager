@@ -1,0 +1,11 @@
+{
+    "id": "yanselmask/admanager",
+    "name": "Admanager",
+    "namespace": "Botble\\Admanager\\",
+    "provider": "Botble\\Admanager\\Providers\\AdmanagerServiceProvider",
+    "author": "Luis Perez",
+    "url": "https://yanselmask.com",
+    "version": "1.0.0",
+    "description": "Services",
+    "minimum_core_version": "7.4.7"
+}

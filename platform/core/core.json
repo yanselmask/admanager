@@ -1,0 +1,10 @@
+{
+    "productId": "09DA5D98",
+    "source": "non_envato",
+    "apiUrl": "https://licenses.yanselmask.com",
+    "apiKey": "DD7915D8999A019D559D",
+    "version": "7.4.7",
+    "marketplaceUrl": "https://marketplace.botble.com/api/v1",
+    "marketplaceToken": "735e480f2269e22432e8ebefbaac213f0b4cf7e2",
+    "minimumPhpVersion": "8.2.0"
+}

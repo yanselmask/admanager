@@ -1,0 +1,11 @@
+{
+    "id": "yanselmask/domain",
+    "name": "Domain",
+    "namespace": "Botble\\Domain\\",
+    "provider": "Botble\\Domain\\Providers\\DomainServiceProvider",
+    "author": "Yanselmask",
+    "url": "https://yanselmask.com",
+    "version": "1.0.0",
+    "description": "",
+    "minimum_core_version": "7.4.7"
+}
