@@ -7,12 +7,9 @@ use Botble\Theme\Facades\Theme;
 use Botble\Theme\Supports\ThemeSupport;
 use Botble\Theme\Typography\TypographyItem;
 use Botble\Widget\Events\RenderingWidgetSettings;
-register_page_template([
-    'default' => __('Default'),
-    'homepage' => __('Home Page'),
-]);
 
 app()->booted(function () {
+
     RvMedia::addSize('medium', 800, 800);
 
     ThemeSupport::registerSiteCopyright();
@@ -41,6 +38,8 @@ app()->booted(function () {
         ThemeSupport::registerSiteLogoHeight();
 
         register_page_template([
+            'default' => __('Default'),
+            'homepage' => __('Home Page'),
             'no-sidebar' => __('No sidebar'),
         ]);
 
