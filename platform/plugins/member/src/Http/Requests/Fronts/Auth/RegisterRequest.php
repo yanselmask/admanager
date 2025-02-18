@@ -17,7 +17,7 @@ class RegisterRequest extends Request
             'email' => ['required', 'max:60', 'min:6', new EmailRule(), Rule::unique((new Member())->getTable())],
             'username' => ['required', 'string','min:5','max:50', Rule::unique((new Member())->getTable(), 'username')],
             'password' => ['required', 'min:6', 'confirmed'],
-            'ref_by' => ['required', 'string', Rule::exists((new Member())->getTable(), 'username')],
+            'ref_by' => ['nullable', 'string', Rule::exists((new Member())->getTable(), 'username')],
             'agree_terms_and_policy' => ['sometimes', 'accepted:1'],
         ];
     }

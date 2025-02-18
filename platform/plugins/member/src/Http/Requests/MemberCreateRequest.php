@@ -22,7 +22,7 @@ class MemberCreateRequest extends Request
                 Rule::unique((new Member())->getTable(), 'email'),
             ],
             'username' => ['required', 'string','min:5','max:50', Rule::unique((new Member())->getTable(), 'username')],
-            'ref_by' => ['nullable', 'string', Rule::exists((new Member())->getTable(), 'username')],
+            'ref_by' =>   ['nullable', 'string', Rule::exists((new Member())->getTable(), 'username')],
             'password' => ['required', 'string', 'min:6', 'confirmed'],
         ];
     }
