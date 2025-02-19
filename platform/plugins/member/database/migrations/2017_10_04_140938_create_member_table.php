@@ -20,6 +20,7 @@ return new class () extends Migration {
             $table->string('phone', 25)->nullable();
             $table->dateTime('confirmed_at')->nullable();
             $table->string('email_verify_token', 120)->nullable();
+            $table->boolean('kyc_verified')->default(0);
             $table->rememberToken();
             $table->timestamps();
         });

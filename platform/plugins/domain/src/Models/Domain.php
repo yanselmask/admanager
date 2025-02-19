@@ -14,6 +14,7 @@ class Domain extends BaseModel
     protected $fillable = [
         'name',
         'url',
+        'network_code',
         'commissions',
         'is_subdomain',
         'member_id',

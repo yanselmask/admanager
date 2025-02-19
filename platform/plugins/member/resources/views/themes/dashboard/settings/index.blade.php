@@ -17,6 +17,10 @@
                     id="change-password-tab"
                     :label="trans('plugins/member::dashboard.change_password')"
                 />
+                <x-core::tab.item
+                    id="change-custom-fields-tab"
+                    :label="trans('Custom Fields')"
+                />
                 {!! apply_filters('member_dashboard_sidebar_menu', null) !!}
                 {!! apply_filters('member_settings_register_content_tabs', null) !!}
             </x-core::tab>
@@ -38,11 +42,21 @@
                 <x-core::tab.pane id="change-password-tab">
                     {!! $changePasswordForm !!}
                 </x-core::tab.pane>
+                <x-core::tab.pane id="change-custom-fields-tab">
+                    {!! $customForm->renderForm(showEnd: false) !!}
+                    @php
+                        do_action(BASE_ACTION_META_BOXES, 'advanced', $customForm->getModel())
+                    @endphp
+                    <x-core::button type="submit" color="primary">{{__('Save changes')}}</x-core::button>
+                    {!! Form::close() !!}
+                </x-core::tab.pane>
                 {!! apply_filters('member_settings_register_content_tab_inside', null) !!}
             </x-core::tab.content>
         </x-core::card.body>
     </x-core::card>
 @endsection
+
+@include('plugins/custom-field::_script-templates.render-custom-fields')
 
 @push('scripts')
     {!! JsValidator::formRequest(Botble\Member\Http\Requests\SettingRequest::class) !!}

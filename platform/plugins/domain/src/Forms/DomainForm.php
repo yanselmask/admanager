@@ -21,6 +21,24 @@ class DomainForm extends FormAbstract
 {
     public function setup(): void
     {
+        $networks = json_decode(setting('admanager_networks'), true);
+
+        $formatted = collect($networks)
+            ->mapWithKeys(function ($items) {
+                $pair = [];
+                foreach ($items as $item) {
+                    if ($item['key'] == 'code') {
+                        $pair['code'] = $item['value'];
+                    }
+                    if ($item['key'] == 'name') {
+                        $pair['name'] = $item['value'];
+                    }
+                }
+                return isset($pair['code'], $pair['name']) ? [$pair['code'] => $pair['name']] : [];
+            })
+            ->toArray();
+
+
         $this
             ->model(Domain::class)
             ->setValidatorClass(DomainRequest::class)
@@ -35,6 +53,14 @@ class DomainForm extends FormAbstract
                     ->choices(is_plugin_active('member') ? Member::query()->pluck('first_name', 'id')->toArray() : [])
                     ->searchable()
                 )
+            ->add('network_code',
+                SelectField::class,
+                SelectFieldOption::make()
+                    ->label(__('Network Code'))
+                    ->choices($formatted)
+                    ->searchable()
+                    ->required()
+            )
             ->add('status', SelectField::class, StatusFieldOption::make())
             ->setBreakFieldPoint('status');
     }

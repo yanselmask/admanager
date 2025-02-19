@@ -24,7 +24,9 @@ use Botble\Member\Forms\Fronts\Auth\ForgotPasswordForm;
 use Botble\Member\Forms\Fronts\Auth\LoginForm;
 use Botble\Member\Forms\Fronts\Auth\RegisterForm;
 use Botble\Member\Forms\Fronts\Auth\ResetPasswordForm;
+use Botble\Member\Http\Middleware\RedirectIfKyc;
 use Botble\Member\Http\Middleware\RedirectIfMember;
+use Botble\Member\Http\Middleware\RedirectIfNotKyc;
 use Botble\Member\Http\Middleware\RedirectIfNotMember;
 use Botble\Member\Http\Requests\Fronts\Auth\ForgotPasswordRequest;
 use Botble\Member\Http\Requests\Fronts\Auth\LoginRequest;
@@ -87,6 +89,8 @@ class MemberServiceProvider extends ServiceProvider
 
         $router->aliasMiddleware('member', RedirectIfNotMember::class);
         $router->aliasMiddleware('member.guest', RedirectIfMember::class);
+        $router->aliasMiddleware('member.kyc.not', RedirectIfNotKyc::class);
+        $router->aliasMiddleware('member.kyc', RedirectIfKyc::class);
 
         $this->app->bind(MemberInterface::class, function () {
             return new MemberRepository(new Member());
@@ -123,7 +127,7 @@ class MemberServiceProvider extends ServiceProvider
                     ->name('plugins/member::member.menu_name')
                     ->icon('ti ti-users')
                     ->url(fn () => route('member.index'))
-                    ->permissions(['member.index'])
+                    ->permissions(['member.index']),
             );
         });
 
@@ -139,11 +143,22 @@ class MemberServiceProvider extends ServiceProvider
                 )
                 ->registerItem(
                     DashboardMenuItem::make()
-                        ->id('cms-member-posts')
+                        ->id('cms-member-referrals')
                         ->priority(20)
-                        ->name('plugins/blog::posts.posts')
-                        ->url(fn () => route('public.member.posts.index'))
-                        ->icon('ti ti-article')
+                        ->name('Referrals')
+                        ->url(fn () => route('public.member.referrals'))
+                        ->icon('ti ti-users')
+                )
+                ->registerItem(
+                    DashboardMenuItem::make()
+                        ->id('cms-member-referrals')
+                        ->priority(20)
+                        ->name('Support')
+                        ->when(setting('support_number') && setting('support_message'))
+                        ->url(fn () => "https://api.whatsapp.com/send?phone=" . rawurlencode(setting('support_number')) .
+                               "&text=" . rawurlencode(setting('support_message'))
+                           )
+                        ->icon('ti ti-brand-whatsapp')
                 )
                 ->registerItem(
                     DashboardMenuItem::make()
@@ -192,6 +207,18 @@ class MemberServiceProvider extends ServiceProvider
                     'login_url' => route('public.member.login'),
                     'redirect_url' => route('public.member.dashboard'),
                 ]);
+            }
+
+            if (defined('CUSTOM_FIELD_MODULE_SCREEN_NAME')) {
+                \Botble\CustomField\Facades\CustomField::registerModule(Member::class)
+                    ->registerRule('basic', __('Member'), Member::class, function () {
+                        return Member::query()->pluck('first_name', 'id')->all();
+                    })
+                    ->expandRule('other', 'Model', 'model_name', function () {
+                        return [
+                            Member::class => __('Member'),
+                        ];
+                    });
             }
         });
 

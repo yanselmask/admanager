@@ -3,20 +3,23 @@
 namespace Botble\Member\Http\Controllers;
 
 use Botble\ACL\Models\User;
-use Botble\Analytics\Analytics;
-use Botble\Analytics\Period;
+use Botble\Admanager\Services\Admanager;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Blog\Models\Post;
+use Botble\CustomField\Facades\CustomField;
+use Botble\CustomField\Models\FieldGroup;
 use Botble\Domain\Models\Domain;
 use Botble\Media\Chunks\Exceptions\UploadMissingFileException;
 use Botble\Media\Chunks\Handler\DropZoneUploadHandler;
 use Botble\Media\Chunks\Receiver\FileReceiver;
 use Botble\Media\Facades\RvMedia;
 use Botble\Media\Models\MediaFile;
+use Botble\Member\Forms\CustomForm;
 use Botble\Member\Forms\Fronts\ChangePasswordForm;
 use Botble\Member\Forms\Fronts\ProfileForm;
+use Botble\Member\Forms\MemberForm;
 use Botble\Member\Http\Requests\AvatarRequest;
 use Botble\Member\Http\Requests\SettingRequest;
 use Botble\Member\Http\Requests\UpdatePasswordRequest;
@@ -107,6 +110,11 @@ class PublicController extends BaseController
         return view('plugins/member::themes.dashboard.index', compact('user','domain'));
     }
 
+    public function getKycForm()
+    {
+        return 'no verificado';
+    }
+
     public function getSettings()
     {
         $this->pageTitle(__('Account settings'));
@@ -120,10 +128,11 @@ class PublicController extends BaseController
 
         $profileForm = ProfileForm::createFromModel($user)->renderForm();
         $changePasswordForm = ChangePasswordForm::create()->renderForm();
+        $customForm = CustomForm::createFromModel($user);
 
         return view(
             'plugins/member::themes.dashboard.settings.index',
-            compact('user', 'profileForm', 'changePasswordForm')
+            compact('user', 'profileForm', 'changePasswordForm','customForm')
         );
     }
 
@@ -138,6 +147,26 @@ class PublicController extends BaseController
 
         MemberActivityLog::query()->create([
             'action' => 'update_setting',
+        ]);
+
+        return $this
+            ->httpResponse()
+            ->setNextRoute('public.member.settings')
+            ->setMessage(__('Update profile successfully!'));
+    }
+
+    public function postCustomFields(Request $request)
+    {
+        $validated = $request->validate([]);
+        CUstomForm::createFromModel(auth('member')->user())
+            ->saving(function (CUstomForm $form) use ($request): void {
+                $model = $form->getModel();
+
+                $model->update($request->all());
+            });
+
+        MemberActivityLog::query()->create([
+            'action' => 'update_custom_field',
         ]);
 
         return $this
@@ -284,5 +313,17 @@ class PublicController extends BaseController
         $account = auth('member')->user();
 
         return RvMedia::uploadFromEditor($request, 0, $account->upload_folder);
+    }
+
+    public function getReferrals()
+    {
+
+        $this->pageTitle(__('Referrals'));
+
+        $user = auth('member')->user();
+
+        $referrals = $user->referrals()->paginate();
+
+        return view('plugins/member::themes.dashboard.referrals', compact('user','referrals'));
     }
 }

@@ -82,6 +82,18 @@ class BlockServiceProvider extends ServiceProvider
                 }
             });
 
+            if (defined('CUSTOM_FIELD_MODULE_SCREEN_NAME')) {
+                CustomField::registerModule(Block::class)
+                    ->registerRule('basic', trans('plugins/block::block.name'), Block::class, function () {
+                        return Block::query()->pluck('name', 'id')->all();
+                    })
+                    ->expandRule('other', trans('plugins/custom-field::rules.model_name'), 'model_name', function () {
+                        return [
+                            Block::class => trans('plugins/block::block.name'),
+                        ];
+                    });
+            }
+
             $this->app->register(HookServiceProvider::class);
         });
     }

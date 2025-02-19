@@ -17,8 +17,9 @@ class ProfileForm extends MemberForm
 
         $this
             ->setValidatorClass(SettingRequest::class)
-            ->setUrl(route('public.member.post.settings'))
+            ->setUrl(route('public.member.post.customfields'))
             ->setFormOption('template', 'core/base::forms.form-content-only')
+            ->template('core/base::forms.form-content-only')
             ->columns()
             ->modify('email', TextField::class, [
                 'required' => false,

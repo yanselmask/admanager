@@ -47,6 +47,7 @@ class Member extends BaseModel implements
         'last_name',
         'email',
         'username',
+        'kyc_verified',
         'password',
         'avatar_id',
         'dob',
@@ -92,6 +93,11 @@ class Member extends BaseModel implements
     public function avatar(): BelongsTo
     {
         return $this->belongsTo(MediaFile::class)->withDefault();
+    }
+
+    public function referrals()
+    {
+        return $this->hasMany(Member::class, 'ref_by', 'id');
     }
 
     public function posts(): MorphMany

@@ -17,6 +17,115 @@ use Google\AdsApi\AdManager\v202411\ServiceFactory;
 use Google\AdsApi\Common\OAuth2TokenBuilder;
 
 class Admanager {
+
+    protected string $networkCode;
+
+    protected string $networkName;
+
+    protected AdManagerSession $session;
+
+    protected $oAuth2Credential;
+
+    protected $dateCsv;
+
+    protected $dateRangeType;
+
+    protected $column;
+
+    public function __construct()
+    {
+    }
+
+    public function setNetworkCode($networkCode)
+    {
+        $this->networkCode = $networkCode;
+
+        $adsapi = storage_path('adsapi_php.ini');
+        $contenido = file_get_contents($adsapi);
+        $nuevaRuta = 'networkCode = "' . $networkCode  .'"';
+        $contenidoModificado = preg_replace(
+            '/networkCode\s*=\s*".*?"/',
+            $nuevaRuta,
+            $contenido
+        );
+
+        file_put_contents($adsapi, $contenidoModificado);
+
+        return $this;
+    }
+
+    public function setNetworkName($networkName)
+    {
+        $this->networkName = $networkName;
+
+        $adsapi = storage_path('adsapi_php.ini');
+        $contenido = file_get_contents($adsapi);
+        $nuevaRuta = 'applicationName = "' . $networkName  .'"';
+        $contenidoModificado = preg_replace(
+            '/applicationName\s*=\s*".*?"/',
+            $nuevaRuta,
+            $contenido
+        );
+
+        file_put_contents($adsapi, $contenidoModificado);
+
+        return $this;
+    }
+
+    public function setSession(AdManagerSession $session)
+    {
+
+        (new AdManagerSessionBuilder())
+            ->fromFile(storage_path('adsapi_php.ini'))
+            ->withOAuth2Credential($this->oAuth2Credential)
+            ->build();
+
+        return $this;
+    }
+
+    public function setDateCsv($dateCsv)
+    {
+        $this->dateCsv = $dateCsv;
+
+        return $this;
+    }
+
+    public function setDateRangeType($dateRangeType)
+    {
+        $this->dateRangeType = $dateRangeType;
+
+        return $this;
+    }
+
+    public function setColumn($column)
+    {
+        $this->column = $column;
+
+        return $this;
+    }
+
+    public function run()
+    {
+        $this->oAuth2Credential = (new OAuth2TokenBuilder())
+            ->fromFile(storage_path('adsapi_php.ini'))
+            ->build();
+
+        $this->session = (new AdManagerSessionBuilder())
+            ->fromFile(storage_path('adsapi_php.ini'))
+            ->withOAuth2Credential($this->oAuth2Credential)
+            ->build();
+
+        self::runReport(
+            new ServiceFactory(),
+            $this->session,
+            dateCsv: $this->dateCsv,
+            dateRangeType: $this->dateRangeType,
+            column: $this->column
+        );
+
+    }
+
+
     public static function runReport(
         ServiceFactory $serviceFactory,
         AdManagerSession $session,
@@ -46,7 +155,8 @@ class Admanager {
         $reportQuery->setAdUnitView(ReportQueryAdUnitView::HIERARCHICAL);
         // Set the start and end dates or choose a dynamic date range type.
         $dateEvaluated = self::evaluateDate($dateRangeType);
-//        dd($dateEvaluated);
+
+
         if(is_array($dateEvaluated))
         {
             $reportQuery->setStartDate($dateEvaluated[0]);
@@ -54,6 +164,8 @@ class Admanager {
         }else{
             $reportQuery->setDateRangeType($dateRangeType);
         }
+
+
         // Create report job and start it.
         $reportJob = new ReportJob();
         $reportJob->setReportQuery($reportQuery);
@@ -180,6 +292,47 @@ class Admanager {
             'LAST_11_MONTHS' => [now()->subMonths(11)->startOfMonth(), now()->today()],
             default => $dateRangeType
         };
+    }
+
+
+    public function getNetworksCode()
+    {
+        $networks = json_decode(setting('admanager_networks'), true);
+
+        $formatted = collect($networks)
+            ->flatten(1)
+            ->map(function ($network) {
+                if($network['key'] == 'code')
+                {
+                    return $network['value'];
+                }
+            })
+            ->filter()
+            ->toArray();
+
+        return array_values($formatted);
+    }
+
+    public function getNetworksCodeAndName()
+    {
+        $networks = json_decode(setting('admanager_networks'), true);
+
+        $formatted = collect($networks)
+            ->mapWithKeys(function ($items) {
+                $pair = [];
+                foreach ($items as $item) {
+                    if ($item['key'] == 'code') {
+                        $pair['code'] = $item['value'];
+                    }
+                    if ($item['key'] == 'name') {
+                        $pair['name'] = $item['value'];
+                    }
+                }
+                return isset($pair['code'], $pair['name']) ? [$pair['code'] => $pair['name']] : [];
+            })
+            ->toArray();
+
+        return $formatted;
     }
 
 }

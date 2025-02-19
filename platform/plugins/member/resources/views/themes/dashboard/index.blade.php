@@ -15,142 +15,66 @@
             </div>
         </div>
     </div>
+    @if(json_decode(setting('earning_member')))
     <x-core::stat-widget class="mb-3 row-cols-1 row-cols-sm-2 row-cols-md-3">
-        <x-core::stat-widget.item
-            :label="trans('Ganancias de hoy')"
-            :value="$domain->getEarning('today')"
-            icon="ti ti-cash-banknote"
-            color="secondary"
-        />
-        <x-core::stat-widget.item
-            :label="trans('Ganancias de ayer')"
-            :value="$domain->getEarning('yesterday')"
-            icon="ti ti-cash-banknote"
-            color="secondary"
-        />
-        <x-core::stat-widget.item
-            :label="trans('Ganancias de esta semana')"
-            :value="$domain->getEarning('this_week')"
-            icon="ti ti-cash-banknote"
-            color="secondary"
-        />
-        <x-core::stat-widget.item
-            :label="trans('Ganancias de este mes')"
-            :value="$domain->getEarning('this_month')"
-            icon="ti ti-cash-banknote"
-            color="secondary"
-        />
-        <x-core::stat-widget.item
-            :label="trans('Ganancias del més pasado')"
-            :value="$domain->getEarning('last_month')"
-            icon="ti ti-cash-banknote"
-            color="secondary"
-        />
-        <x-core::stat-widget.item
-            :label="trans('Ganancias de la semana pasada')"
-            :value="$domain->getEarning('last_week')"
-            icon="ti ti-cash-banknote"
-            color="secondary"
-        />
-        <x-core::stat-widget.item
-            :label="trans('Ganancias de los ultimos 3 meses')"
-            :value="$domain->getEarning('last_3_months')"
-            icon="ti ti-cash-banknote"
-            color="secondary"
-        />
-        <x-core::stat-widget.item
-            :label="trans('Ganancias de los ultimos 6 meses')"
-            :value="$domain->getEarning('last_6_months')"
-            icon="ti ti-cash-banknote"
-            color="secondary"
-        />
-        <x-core::stat-widget.item
-            :label="trans('Ganancias de los ultimos 9 meses')"
-            :value="$domain->getEarning('last_9_months')"
-            icon="ti ti-cash-banknote"
-            color="secondary"
-        />
+        @foreach(json_decode(setting('earning_member')) as $key)
+            <x-core::stat-widget.item
+                :label="trans('Ganancias de :key',['key' => ucfirst(str_replace('_', ' ', $key))])"
+                :value="$domain->getEarning($key)"
+                icon="ti ti-cash-banknote"
+                color="secondary"
+            />
+        @endforeach
     </x-core::stat-widget>
+    @endif
+    @if(json_decode(setting('impressions_member')))
     <x-core::stat-widget class="mb-3 row-cols-1 row-cols-sm-2 row-cols-md-3">
-        <x-core::stat-widget.item
-            :label="trans('Impresiones de hoy')"
-            :value="$domain->getImpressions('today')"
-            icon="ti ti-timeline"
-            color="info"
-        />
-        <x-core::stat-widget.item
-            :label="trans('Impresiones de ayer')"
-            :value="$domain->getImpressions('yesterday')"
-            icon="ti ti-timeline"
-            color="info"
-        />
-        <x-core::stat-widget.item
-            :label="trans('Impresiones del mes pasado')"
-            :value="$domain->getImpressions('last_month')"
-            icon="ti ti-timeline"
-            color="info"
-        />
+        @foreach(json_decode(setting('impressions_member')) as $key)
+            <x-core::stat-widget.item
+                :label="trans('Impresiones de :key', ['key' => ucfirst(str_replace('_', ' ', $key))])"
+                :value="$domain->getImpressions($key)"
+                icon="ti ti-timeline"
+                color="info"
+            />
+        @endforeach
     </x-core::stat-widget>
+    @endif
+    @if(json_decode(setting('clicks_member')))
     <x-core::stat-widget class="mb-3 row-cols-1 row-cols-sm-2 row-cols-md-3">
-        <x-core::stat-widget.item
-            :label="trans('Clicks de hoy')"
-            :value="$domain->getClicks('today')"
-            icon="ti ti-click"
-            color="primary"
-        />
-        <x-core::stat-widget.item
-            :label="trans('Clicks de ayer')"
-            :value="$domain->getClicks('yesterday')"
-            icon="ti ti-click"
-            color="primary"
-        />
-        <x-core::stat-widget.item
-            :label="trans('Clicks del mes pasado')"
-            :value="$domain->getClicks('last_month')"
-            icon="ti ti-click"
-            color="primary"
-        />
+        @foreach(json_decode(setting('clicks_member')) as $key)
+            <x-core::stat-widget.item
+                :label="trans('Clicks de :key',['key' => ucfirst(str_replace('_', ' ', $key))])"
+                :value="$domain->getClicks($key)"
+                icon="ti ti-click"
+                color="primary"
+            />
+        @endforeach
     </x-core::stat-widget>
+    @endif
+    @if(json_decode(setting('ctrs_member')))
     <x-core::stat-widget class="mb-3 row-cols-1 row-cols-sm-2 row-cols-md-3">
-        <x-core::stat-widget.item
-            :label="trans('Ctrs de hoy')"
-            :value="$domain->getCtrs('today')"
-            icon="ti ti-hand-click"
-            color="danger"
-        />
-        <x-core::stat-widget.item
-            :label="trans('Ctrs de ayer')"
-            :value="$domain->getCtrs('yesterday')"
-            icon="ti ti-hand-click"
-            color="danger"
-        />
-        <x-core::stat-widget.item
-            :label="trans('Ctrs del mes pasado')"
-            :value="$domain->getCtrs('last_month')"
-            icon="ti ti-hand-click"
-            color="danger"
-        />
+        @foreach(json_decode(setting('ctrs_member')) as $key)
+            <x-core::stat-widget.item
+                :label="trans('Ctrs de :key',['key' => ucfirst(str_replace('_', ' ', $key))])"
+                :value="$domain->getCtrs($key)"
+                icon="ti ti-hand-click"
+                color="danger"
+            />
+        @endforeach
     </x-core::stat-widget>
+    @endif
+    @if(json_decode(setting('ecpms_member')))
     <x-core::stat-widget class="mb-3 row-cols-1 row-cols-sm-2 row-cols-md-3">
-    <x-core::stat-widget.item
-        :label="trans('Ecpms de hoy')"
-        :value="$domain->getEcpms('today')"
-        icon="ti ti-moneybag"
-        color="warning"
-    />
-    <x-core::stat-widget.item
-        :label="trans('Ecpms de ayer')"
-        :value="$domain->getEcpms('yesterday')"
-        icon="ti ti-moneybag"
-        color="warning"
-    />
-    <x-core::stat-widget.item
-        :label="trans('Ecpms del mes pasado')"
-        :value="$domain->getEcpms('last_month')"
-        icon="ti ti-moneybag"
-        color="warning"
-    />
+        @foreach(json_decode(setting('ecpms_member')) as $key)
+            <x-core::stat-widget.item
+                :label="trans('Ecpms de :key',['key' => ucfirst(str_replace('_', ' ', $key))])"
+                :value="$domain->getEcpms($key)"
+                icon="ti ti-moneybag"
+                color="warning"
+            />
+        @endforeach
 </x-core::stat-widget>
+    @endif
     @endif
     <activity-log-component></activity-log-component>
 @stop

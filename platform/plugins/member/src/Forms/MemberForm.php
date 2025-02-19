@@ -8,6 +8,7 @@ use Botble\Base\Forms\FieldOptions\DescriptionFieldOption;
 use Botble\Base\Forms\FieldOptions\EmailFieldOption;
 use Botble\Base\Forms\FieldOptions\MediaImageFieldOption;
 use Botble\Base\Forms\FieldOptions\OnOffFieldOption;
+use Botble\Base\Forms\FieldOptions\SelectFieldOption;
 use Botble\Base\Forms\FieldOptions\StatusFieldOption;
 use Botble\Base\Forms\FieldOptions\TextFieldOption;
 use Botble\Base\Forms\Fields\DatePickerField;
@@ -25,6 +26,8 @@ class MemberForm extends FormAbstract
     public function setup(): void
     {
         Assets::addScriptsDirectly(['/vendor/core/plugins/member/js/member-admin.js']);
+
+
         $this
             ->model(Member::class)
             ->setValidatorClass(MemberCreateRequest::class)
@@ -80,8 +83,21 @@ class MemberForm extends FormAbstract
                 DatePickerField::class,
                 DatePickerFieldOption::make()
                     ->label(trans('plugins/member::member.dob'))
-                    ->colspan(2)
+                    ->colspan(1)
             )
+            ->when(auth('member')->user()->domains->count(),function($form){
+                $form->add('payment_method_default',
+                    SelectField::class,
+                    SelectFieldOption::make()
+                        ->label(trans('Payment Method'))
+                        ->choices([
+                            'paypal' => __('Paypal'),
+                            'usdt_trc20' => __('USDT TRC20'),
+                            'usdt_bep20' => __('USDT BEP20'),
+                            'bank' => __('Bank')
+                        ])
+                );
+            })
             ->add(
                 'description',
                 TextareaField::class,

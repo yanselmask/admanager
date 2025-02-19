@@ -52,7 +52,7 @@ if (defined('THEME_MODULE_SCREEN_NAME')) {
 
         Route::group([
             'namespace' => 'Botble\Member\Http\Controllers',
-            'middleware' => ['web', 'core', 'member'],
+            'middleware' => ['web', 'core', 'member','member.kyc.not'],
             'as' => 'public.member.',
         ], function (): void {
             Route::group([
@@ -65,6 +65,11 @@ if (defined('THEME_MODULE_SCREEN_NAME')) {
                     'uses' => 'PublicController@getDashboard',
                 ]);
 
+                Route::get('referrals', [
+                    'as' => 'referrals',
+                    'uses' => 'PublicController@getReferrals',
+                ]);
+
                 Route::get('settings', [
                     'as' => 'settings',
                     'uses' => 'PublicController@getSettings',
@@ -73,6 +78,11 @@ if (defined('THEME_MODULE_SCREEN_NAME')) {
                 Route::post('settings', [
                     'as' => 'post.settings',
                     'uses' => 'PublicController@postSettings',
+                ]);
+
+                Route::post('settings', [
+                    'as' => 'post.customfields',
+                    'uses' => 'PublicController@postCustomFields',
                 ]);
 
                 Route::put('security', [
@@ -85,6 +95,7 @@ if (defined('THEME_MODULE_SCREEN_NAME')) {
                     'uses' => 'PublicController@postAvatar',
                 ]);
             });
+
 
             Route::group(['prefix' => 'ajax/members'], function (): void {
                 Route::get('activity-logs', [
@@ -119,5 +130,22 @@ if (defined('THEME_MODULE_SCREEN_NAME')) {
                 });
             }
         });
+
+        Route::group([
+            'namespace' => 'Botble\Member\Http\Controllers',
+            'middleware' => ['web', 'core', 'member','member.kyc'],
+            'as' => 'public.member.',
+        ], function (): void {
+            Route::group([
+                'prefix' => 'account',
+            ], function (): void {
+                Route::get('kyc', [
+                    'as' => 'kyc',
+                    'uses' => 'PublicController@getKycForm',
+                ]);
+            });
+
+        });
+
     });
 }

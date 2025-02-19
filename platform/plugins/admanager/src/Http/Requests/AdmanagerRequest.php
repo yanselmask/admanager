@@ -11,11 +11,19 @@ class AdmanagerRequest extends Request
     public function rules(): array
     {
         return [
-            'admanager_network_code' => ['required', 'string'],
-            'admanager_network_name' => ['nullable', 'string'],
+            'admanager_networks' => ['required'],
             'admanager_json' => ['required'],
+            'support_number' => 'nullable',
+            'support_message' => 'nullable',
             'percentage_default' => ['required', 'integer','min:0', 'max:100'],
+            'referral_commissions' => ['required', 'integer','min:0', 'max:100'],
             'week_start' => ['nullable', 'integer', 'min:0', 'max:6'],
+            'earning_member' => ['nullable','array'],
+            'impressions_member' => 'nullable',
+            'clicks_member' => 'nullable',
+            'ctrs_member' => 'nullable',
+            'ecpms_member' => 'nullable',
+            'member_kyc_is_required' => 'nullable'
         ];
     }
 }

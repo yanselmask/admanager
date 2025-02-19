@@ -14,8 +14,11 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        Schema::table('teams', function (Blueprint $table): void {
-            $table->dropColumn('status');
-        });
+        if(Schema::hasTable('teams'))
+        {
+            Schema::table('teams', function (Blueprint $table): void {
+                $table->dropColumn('status');
+            });
+        }
     }
 };

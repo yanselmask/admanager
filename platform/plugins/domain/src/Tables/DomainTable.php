@@ -36,6 +36,7 @@ class DomainTable extends TableAbstract
                 IdColumn::make(),
                 NameColumn::make()->route('domain.edit'),
                 NameColumn::make('url')->label(__('Url'))->route('domain.edit'),
+                NameColumn::make('network_code')->label(__('Network Code'))->route('domain.edit'),
                 FormattedColumn::make('member_id')
                     ->title(__('Author'))
                     ->width(150)

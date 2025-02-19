@@ -12,6 +12,7 @@ return new class () extends Migration {
                 $table->id();
                 $table->string('name', 255);
                 $table->string('url', 255);
+                $table->string('network_code', 255);
                 $table->decimal('commissions', 12, 2)->nullable();
                 $table->boolean('is_subdomain')->default(false);
                 $table->json('earnings')->nullable();

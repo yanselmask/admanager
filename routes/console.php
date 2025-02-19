@@ -1,5 +1,6 @@
 <?php
 
+use Botble\Admanager\Services\Admanager;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 
@@ -19,12 +20,37 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Artisan::command('generate:report', function () {
-    \Botble\Admanager\Services\Admanager::main('today','TODAY','today');
-    \Botble\Admanager\Services\Admanager::main('yesterday','YESTERDAY','yesterday');
-    \Botble\Admanager\Services\Admanager::main('last_6_months','LAST_6_MONTHS','last_6_months');
-    \Botble\Admanager\Services\Admanager::main('last_week','LAST_WEEK','last_week');
-    \Botble\Admanager\Services\Admanager::main('last_month','LAST_MONTH','last_month');
-    \Botble\Admanager\Services\Admanager::main('last_3_months','LAST_3_MONTHS','last_3_months');
-    \Botble\Admanager\Services\Admanager::main('reach_lifetime','REACH_LIFETIME','reach_lifetime');
+    $manageNetworks = new \Botble\Admanager\Services\Admanager();
+    foreach ($manageNetworks->getNetworksCodeAndName() as $key => $value)
+    {
+        foreach (json_decode(setting('earning_member')) as $date)
+        {
+                $manager = new Admanager();
+                $manager->setNetworkCode($key)
+                        ->setNetworkName($value)
+                        ->setDateCsv($date)
+                        ->setDateRangeType(strtoupper($date))
+                        ->setColumn($date)
+                        ->run();
+        }
+
+    }
+//    \Botble\Admanager\Services\Admanager::main('today','TODAY','today');
     $this->info('Generated report successfully!');
+});
+
+Artisan::command('generate:report:custom {date}', function () {
+    $manageNetworks = new \Botble\Admanager\Services\Admanager();
+    foreach ($manageNetworks->getNetworksCodeAndName() as $key => $value)
+    {
+        $date = $this->argument('date');
+
+        $manager = new Admanager();
+        $manager->setNetworkCode($key)
+            ->setNetworkName($value)
+            ->setDateCsv(strtolower($date))
+            ->setDateRangeType(strtoupper($date))
+            ->setColumn(strtolower($date))
+            ->run();
+    }
 });
