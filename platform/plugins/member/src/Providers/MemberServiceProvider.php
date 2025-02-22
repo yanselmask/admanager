@@ -158,7 +158,7 @@ class MemberServiceProvider extends ServiceProvider
                     DashboardMenuItem::make()
                         ->id('cms-member-invoices')
                         ->priority(30)
-                        ->name('Invoices')
+                        ->name('Payments')
                         ->url(fn () => route('public.member.invoices'))
                         ->icon('ti ti-invoice')
                 )

@@ -18,6 +18,14 @@ class AdmanagerSettingController extends SettingController
         return AdmanagerSettingForm::create()->renderForm();
     }
 
+    protected function clearIfNotExist($request, $key): void
+    {
+        if(!$request->$key)
+        {
+            setting()->set($key, []);
+        }
+    }
+
     public function update(AdmanagerRequest $request)
     {
         if(setting('admanager_json') != $request->input('admanager_json'))
@@ -33,6 +41,16 @@ class AdmanagerSettingController extends SettingController
 
             file_put_contents($adsapi, $contenidoModificado);
         }
+
+        $this->clearIfNotExist($request, 'admanager_networks');
+        $this->clearIfNotExist($request, 'earning_member');
+        $this->clearIfNotExist($request, 'impressions_member');
+        $this->clearIfNotExist($request, 'clicks_member');
+        $this->clearIfNotExist($request, 'ctrs_member');
+        $this->clearIfNotExist($request, 'ecpms_member');
+        $this->clearIfNotExist($request, 'kyc_fields');
+        $this->clearIfNotExist($request, 'kyc_nationalities');
+        $this->clearIfNotExist($request, 'kyc_documents_types');
 
         return $this->performUpdate($request->validated());
     }

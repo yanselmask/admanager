@@ -199,14 +199,12 @@ class AdmanagerSettingForm extends SettingForm
                 TextField::class,
                 TextFieldOption::make()->label(__('Support Number'))
                     ->value(setting('support_number'))
-                    ->required()
                     ->helperText(__('Escriba un número de soporte'))
             )
             ->add('support_message',
                 TextareaField::class,
                 TextareaFieldOption::make()->label(__('Support Message'))
                     ->value(setting('support_message'))
-                    ->required()
                     ->helperText(__('Escriba un mensaje por defecto'))
             )
             ->add('member_kyc_is_required',

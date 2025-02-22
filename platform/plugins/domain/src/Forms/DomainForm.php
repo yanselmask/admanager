@@ -47,7 +47,7 @@ class DomainForm extends FormAbstract
             ->add('is_subdomain', OnOffField::class, OnOffFieldOption::make()->label(__('Subdomain')))
             ->add('commissions', TextField::class, TextFieldOption::make()->helperText(__('Esta es la comisión que te tocará de este sitio web.')))
             ->add('commissions_network', TextField::class, TextFieldOption::make()->helperText(__('Esta es la comisión que le tocara a la network')))
-            ->add('commissions_webmaster', TextField::class, TextFieldOption::make()->helperText(__('Esta es la comisión que le tocara al webmaster')))
+            ->add('commissions_webmaster', TextField::class, TextFieldOption::make()->helperText(__('Esta es la comisión que le tocara al promotor')))
             ->add('member_id',
                 SelectField::class,
                 SelectFieldOption::make()
