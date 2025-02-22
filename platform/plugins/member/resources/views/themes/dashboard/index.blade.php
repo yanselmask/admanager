@@ -14,8 +14,18 @@
                 </select>
             </div>
         </div>
+        <div class="col-sm-12 col-md-4">
+            <div class="form-group">
+                <label for="graf">{{__('Seleccione un grafico')}}</label>
+                <select id="graf" onchange="updateDomain(event, 'graf')" class="form-control">
+                    @foreach($optionsGraf as $graf)
+                        <option @selected(request()->query('graf') == $graf) value="{{$graf}}">{{ucfirst($graf)}}</option>
+                    @endforeach
+                </select>
+            </div>
+        </div>
     </div>
-    @if(json_decode(setting('earning_member')))
+    @if(json_decode(setting('earning_member')) && (request()->query('graf') == '' || request()->query('graf') == 'earning'))
     <x-core::stat-widget class="mb-3 row-cols-1 row-cols-sm-2 row-cols-md-3">
         @foreach(json_decode(setting('earning_member')) as $key)
             <x-core::stat-widget.item
@@ -27,7 +37,7 @@
         @endforeach
     </x-core::stat-widget>
     @endif
-    @if(json_decode(setting('impressions_member')))
+    @if(json_decode(setting('impressions_member')) && request()->query('graf') == 'impressions')
     <x-core::stat-widget class="mb-3 row-cols-1 row-cols-sm-2 row-cols-md-3">
         @foreach(json_decode(setting('impressions_member')) as $key)
             <x-core::stat-widget.item
@@ -39,7 +49,7 @@
         @endforeach
     </x-core::stat-widget>
     @endif
-    @if(json_decode(setting('clicks_member')))
+    @if(json_decode(setting('clicks_member')) && request()->query('graf') == 'clicks')
     <x-core::stat-widget class="mb-3 row-cols-1 row-cols-sm-2 row-cols-md-3">
         @foreach(json_decode(setting('clicks_member')) as $key)
             <x-core::stat-widget.item
@@ -51,7 +61,7 @@
         @endforeach
     </x-core::stat-widget>
     @endif
-    @if(json_decode(setting('ctrs_member')))
+    @if(json_decode(setting('ctrs_member')) && request()->query('graf') == 'ctrs')
     <x-core::stat-widget class="mb-3 row-cols-1 row-cols-sm-2 row-cols-md-3">
         @foreach(json_decode(setting('ctrs_member')) as $key)
             <x-core::stat-widget.item
@@ -63,11 +73,11 @@
         @endforeach
     </x-core::stat-widget>
     @endif
-    @if(json_decode(setting('ecpms_member')))
+    @if(json_decode(setting('ecpms_member')) && request()->query('graf') == 'ecpm')
     <x-core::stat-widget class="mb-3 row-cols-1 row-cols-sm-2 row-cols-md-3">
         @foreach(json_decode(setting('ecpms_member')) as $key)
             <x-core::stat-widget.item
-                :label="trans('Ecpms de :key',['key' => ucfirst(str_replace('_', ' ', $key))])"
+                :label="trans('Ecpm de :key',['key' => ucfirst(str_replace('_', ' ', $key))])"
                 :value="$domain->getEcpms($key)"
                 icon="ti ti-moneybag"
                 color="warning"
@@ -80,14 +90,14 @@
 @stop
 @push('scripts')
     <script>
-        function updateDomain(event) {
+        function updateDomain(event, path = 'domain') {
             const newDomain = event.target.value;
             const url = new URL(window.location.href);
 
-            url.searchParams.delete('domain');
+            url.searchParams.delete(path);
 
             if (newDomain) {
-                url.searchParams.set('domain', newDomain);
+                url.searchParams.set(path, newDomain);
             }
 
             window.location.href = url.toString();

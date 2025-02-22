@@ -25,8 +25,11 @@ use Botble\Member\Http\Requests\KycRequest;
 use Botble\Member\Http\Requests\SettingRequest;
 use Botble\Member\Http\Requests\UpdatePasswordRequest;
 use Botble\Member\Http\Resources\ActivityLogResource;
+use Botble\Member\Models\Invoice;
 use Botble\Member\Models\Member;
 use Botble\Member\Models\MemberActivityLog;
+use Botble\Member\Tables\InvoiceFrontTable;
+use Botble\Member\Tables\InvoiceTable;
 use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\SeoHelper\SeoOpenGraph;
 use Botble\Slug\Facades\SlugHelper;
@@ -93,6 +96,8 @@ class PublicController extends BaseController
 
         $domain = Domain::where('member_id', $user->id)->first();
 
+        $optionsGraf = ['earning', 'impressions', 'clicks', 'ctrs', 'ecpm'];
+
         if($dname = request()->input('domain'))
         {
             $domain = Domain::where('url', $dname)->where('member_id', $user->id)->first();
@@ -108,7 +113,7 @@ class PublicController extends BaseController
         Assets::addScriptsDirectly('vendor/core/plugins/member/js/dashboard/activity-logs.js');
         Assets::usingVueJS();
 
-        return view('plugins/member::themes.dashboard.index', compact('user','domain'));
+        return view('plugins/member::themes.dashboard.index', compact('user','domain','optionsGraf'));
     }
 
     public function getKycForm()
@@ -402,4 +407,14 @@ class PublicController extends BaseController
 
         return $request;
     }
+
+    public function getInvoices()
+    {
+        $this->pageTitle(__('Invoices'));
+        $user = auth('member')->user();
+        $invoices = Invoice::query()->where('member_id', auth('member')->id())->latest()->paginate();
+
+        return view('plugins/member::themes.dashboard.invoices', compact('user', 'invoices'));
+    }
+
 }

@@ -23,6 +23,7 @@ class Invoice extends BaseModel
     protected $casts = [
 //        'status' => InvoiceStatus::class,
         'name' => SafeContent::class,
+        'invoice_date' => 'datetime'
     ];
 
     protected static function boot(): void

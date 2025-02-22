@@ -70,6 +70,11 @@ if (defined('THEME_MODULE_SCREEN_NAME')) {
                     'uses' => 'PublicController@getReferrals',
                 ]);
 
+                Route::get('invoices', [
+                    'as' => 'invoices',
+                    'uses' => 'PublicController@getInvoices',
+                ]);
+
                 Route::get('settings', [
                     'as' => 'settings',
                     'uses' => 'PublicController@getSettings',

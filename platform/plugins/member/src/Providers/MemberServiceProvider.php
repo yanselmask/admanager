@@ -156,8 +156,16 @@ class MemberServiceProvider extends ServiceProvider
                 )
                 ->registerItem(
                     DashboardMenuItem::make()
-                        ->id('cms-member-referrals')
-                        ->priority(20)
+                        ->id('cms-member-invoices')
+                        ->priority(30)
+                        ->name('Invoices')
+                        ->url(fn () => route('public.member.invoices'))
+                        ->icon('ti ti-invoice')
+                )
+                ->registerItem(
+                    DashboardMenuItem::make()
+                        ->id('cms-member-support')
+                        ->priority(40)
                         ->name('Support')
                         ->when(setting('support_number') && setting('support_message'))
                         ->url(fn () => "https://api.whatsapp.com/send?phone=" . rawurlencode(setting('support_number')) .
@@ -168,7 +176,7 @@ class MemberServiceProvider extends ServiceProvider
                 ->registerItem(
                     DashboardMenuItem::make()
                         ->id('cms-member-settings')
-                        ->priority(30)
+                        ->priority(50)
                         ->name('plugins/member::dashboard.header_settings_link')
                         ->url(fn () => route('public.member.settings'))
                         ->icon('ti ti-settings')
