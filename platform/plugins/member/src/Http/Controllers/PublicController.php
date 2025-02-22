@@ -19,8 +19,9 @@ use Botble\Media\Models\MediaFile;
 use Botble\Member\Forms\CustomForm;
 use Botble\Member\Forms\Fronts\ChangePasswordForm;
 use Botble\Member\Forms\Fronts\ProfileForm;
-use Botble\Member\Forms\MemberForm;
+use Botble\Member\Forms\KycFrontForm;
 use Botble\Member\Http\Requests\AvatarRequest;
+use Botble\Member\Http\Requests\KycRequest;
 use Botble\Member\Http\Requests\SettingRequest;
 use Botble\Member\Http\Requests\UpdatePasswordRequest;
 use Botble\Member\Http\Resources\ActivityLogResource;
@@ -112,7 +113,51 @@ class PublicController extends BaseController
 
     public function getKycForm()
     {
-        return 'no verificado';
+        $this->pageTitle(__('Kyc'));
+
+        $form = KycFrontForm::create()->renderForm();
+
+        $user = auth('member')->user();
+
+        return view('plugins/member::themes.dashboard.kyc', compact('form', 'user'));
+    }
+
+    public function postKyc(KycRequest $request)
+    {
+        $validated = $this->processRequestDataKyc($request);
+
+
+        KycFrontForm::createFromModel(auth('member')->user())
+            ->saving(function (KycFrontForm $form) use ($request): void {
+                $model = $form->getModel();
+
+                $model->kyc()->updateOrCreate(
+                    ['member_id' => $model->id],
+                    [
+                        'name' => $request->name,
+                        'last_name' => $request->last_name,
+                        'address' => $request->address,
+                        'nationality' => $request->nationality,
+                        'document_type' => $request->document_type,
+                        'document_number' => $request->document_number,
+                        'document_front' => $request->document_front,
+                        'document_back' => $request->document_back,
+                        'selfie' => $request->selfie,
+                        'status' => 'pending'
+                    ]
+                );
+
+            });
+
+
+        MemberActivityLog::query()->create([
+            'action' => 'kyc_send',
+        ]);
+
+        return $this
+            ->httpResponse()
+            ->setNextRoute('public.member.settings')
+            ->setMessage(__('Kyc sent successfully!'));
     }
 
     public function getSettings()
@@ -325,5 +370,36 @@ class PublicController extends BaseController
         $referrals = $user->referrals()->paginate();
 
         return view('plugins/member::themes.dashboard.referrals', compact('user','referrals'));
+    }
+
+    protected function processRequestDataKyc(Request $request): Request
+    {
+        $model = auth('member')->user();
+
+        if ($request->hasFile('document_front_input')) {
+            $result = RvMedia::handleUpload($request->file('document_front_input'), 0, $model->upload_folder);
+            if (! $result['error']) {
+                $file = $result['data'];
+                $request->merge(['document_front' => $file->url]);
+            }
+        }
+
+        if ($request->hasFile('document_back_input')) {
+            $result = RvMedia::handleUpload($request->file('document_back_input'), 0, $model->upload_folder);
+            if (! $result['error']) {
+                $file = $result['data'];
+                $request->merge(['document_back' => $file->url]);
+            }
+        }
+
+        if ($request->hasFile('selfie_input')) {
+            $result = RvMedia::handleUpload($request->file('selfie_input'), 0, $model->upload_folder);
+            if (! $result['error']) {
+                $file = $result['data'];
+                $request->merge(['selfie' => $file->url]);
+            }
+        }
+
+        return $request;
     }
 }

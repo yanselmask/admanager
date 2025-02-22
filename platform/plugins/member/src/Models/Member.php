@@ -165,4 +165,14 @@ class Member extends BaseModel implements
     {
         return $this->hasMany(Domain::class);
     }
+
+    public function kyc()
+    {
+        return $this->hasOne(Kyc::class);
+    }
+
+    public function invoices()
+    {
+        return $this->hasMany(Invoice::class);
+    }
 }

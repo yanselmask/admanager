@@ -18,5 +18,11 @@ class Plugin extends PluginOperationAbstract
             'verify_account_email',
             'member_enable_recaptcha_in_register_page',
         ]);
+
+        Schema::dropIfExists('kycs');
+        Schema::dropIfExists('kycs_translations');
+
+        Schema::dropIfExists('invoices');
+        Schema::dropIfExists('invoices_translations');
     }
 }

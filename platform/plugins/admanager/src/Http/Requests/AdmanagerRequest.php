@@ -23,7 +23,12 @@ class AdmanagerRequest extends Request
             'clicks_member' => 'nullable',
             'ctrs_member' => 'nullable',
             'ecpms_member' => 'nullable',
-            'member_kyc_is_required' => 'nullable'
+            'member_kyc_is_required' => 'nullable',
+            'kyc_fields' => 'nullable',
+            'kyc_nationalities' => 'nullable',
+            'kyc_documents_types' => 'nullable',
+            'invoice_prefix' => 'nullable',
+            'invoices_currencies' => 'nullable'
         ];
     }
 }

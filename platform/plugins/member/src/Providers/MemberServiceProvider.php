@@ -43,19 +43,6 @@ use Botble\Slug\Facades\SlugHelper;
 use Botble\SocialLogin\Facades\SocialService;
 use Botble\Theme\Events\RenderingThemeOptionSettings;
 use Botble\Theme\FormFrontManager;
-use Google\AdsApi\AdManager\AdManagerSessionBuilder;
-use Google\AdsApi\AdManager\Util\v202402\ReportDownloader;
-use Google\AdsApi\AdManager\Util\v202402\StatementBuilder;
-use Google\AdsApi\AdManager\v202402\Column;
-use Google\AdsApi\AdManager\v202402\DateRange;
-use Google\AdsApi\AdManager\v202402\DateRangeType;
-use Google\AdsApi\AdManager\v202402\Dimension;
-use Google\AdsApi\AdManager\v202402\ExportFormat;
-use Google\AdsApi\AdManager\v202402\ReportJob;
-use Google\AdsApi\AdManager\v202402\ReportQuery;
-use Google\AdsApi\AdManager\v202402\ReportQueryAdUnitView;
-use Google\AdsApi\AdManager\v202402\ServiceFactory;
-use Google\AdsApi\Common\OAuth2TokenBuilder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -129,6 +116,24 @@ class MemberServiceProvider extends ServiceProvider
                     ->url(fn () => route('member.index'))
                     ->permissions(['member.index']),
             );
+            DashboardMenu::registerItem([
+                'id' => 'cms-plugins-kyc',
+                'priority' => 0,
+                'parent_id' => 'cms-plugins-member',
+                'name' => 'plugins/member::kyc.name',
+                'icon' => 'ti ti-user-scan',
+                'url' => route('kyc.index'),
+                'permissions' => ['kyc.index'],
+            ]);
+            DashboardMenu::registerItem([
+                'id' => 'cms-plugins-invoice',
+                'priority' => 0,
+                'parent_id' => 'cms-plugins-member',
+                'name' => 'plugins/member::invoice.name',
+                'icon' => 'ti ti-invoice',
+                'url' => route('invoice.index'),
+                'permissions' => ['invoice.index'],
+            ]);
         });
 
         DashboardMenu::for('member')->beforeRetrieving(function (): void {
@@ -206,6 +211,17 @@ class MemberServiceProvider extends ServiceProvider
                     'model' => Member::class,
                     'login_url' => route('public.member.login'),
                     'redirect_url' => route('public.member.dashboard'),
+                ]);
+            }
+
+            if (defined('LANGUAGE_ADVANCED_MODULE_SCREEN_NAME'))
+            {
+                \Botble\LanguageAdvanced\Supports\LanguageAdvancedManager::registerModule(\Botble\Member\Models\Kyc::class, [
+                    'name',
+                ]);
+
+                \Botble\LanguageAdvanced\Supports\LanguageAdvancedManager::registerModule(\Botble\Member\Models\Invoice::class, [
+                    'name',
                 ]);
             }
 

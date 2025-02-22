@@ -75,7 +75,7 @@
                 <div
                     class="col plugin-item"
                     data-name="{{ $plugin->name }}"
-                    data-author="{{ $plugin->author }}"
+                    data-author="{{ __('Yanselmask') }}"
                     data-description="{{ $plugin->description }}"
                     data-status="{{ $plugin->status ? 'activated' : 'not-activated' }}"
                 >
@@ -108,7 +108,7 @@
                                         @if (! empty($plugin->url))
                                             <a href="{{ $plugin->url }}" target="_blank" class="fw-bold">{{ $plugin->author }}</a>
                                         @else
-                                            <strong>{{ $plugin->author }}</strong>
+                                            <strong>{{ __('Yanselmask') }}</strong>
                                         @endif
                                     </div>
                                 @endif

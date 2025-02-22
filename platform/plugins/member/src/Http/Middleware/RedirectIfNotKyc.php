@@ -10,7 +10,7 @@ class RedirectIfNotKyc
 {
     public function handle(Request $request, Closure $next, string $guard = 'member')
     {
-        if (Auth::guard($guard)->check() && ( setting('member_kyc_is_required', false) && !Auth::guard($guard)->user()->kyc_verified ) ) {
+        if (setting('member_kyc_is_required', false) && ( Auth::guard($guard)->check() && Auth::guard($guard)->user()->kyc?->status->getValue() != 'published' ) && $request->isMethod('GET')  ) {
             return redirect(route('public.member.kyc'));
         }
 

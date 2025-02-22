@@ -52,10 +52,12 @@
                     </div>
                 </div>
 
-{{--                <div class="ps-block--earning-count">--}}
-{{--                    <small>{{ __('Posts approved') }}</small>--}}
-{{--                    <h3>{{ number_format(auth('member')->user()->posts()->wherePublished()->count()) }}</h3>--}}
-{{--                </div>--}}
+                @if(setting('member_kyc_is_required', false))
+                <div class="ps-block--earning-count">
+                    <small>{{ __('Kyc verified') }}</small> <br />
+                   <div class="badge text-white bg-{{auth('member')->user()->kyc?->status?->getValue() == 'published' ? 'success' : 'danger'}}">{{auth('member')->user()->kyc?->status?->getValue() == 'published' ? __('Yes') : __('No')}}</div>
+                </div>
+                @endif
             </div>
             <div class="ps-sidebar__content">
                 <div class="ps-sidebar__center">

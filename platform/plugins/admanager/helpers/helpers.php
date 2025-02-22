@@ -12,3 +12,4 @@ if(!function_exists('getValueWithCommissions'))
         return Number::abbreviate( $round ? round($initialValue) : $initialValue, 2);
     }
 }
+

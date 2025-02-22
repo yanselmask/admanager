@@ -85,6 +85,11 @@ if (defined('THEME_MODULE_SCREEN_NAME')) {
                     'uses' => 'PublicController@postCustomFields',
                 ]);
 
+                Route::post('kyc', [
+                    'as' => 'post.kyc',
+                    'uses' => 'PublicController@postKyc',
+                ]);
+
                 Route::put('security', [
                     'as' => 'post.security',
                     'uses' => 'PublicController@postSecurity',

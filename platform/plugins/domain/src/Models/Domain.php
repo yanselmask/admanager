@@ -16,6 +16,8 @@ class Domain extends BaseModel
         'url',
         'network_code',
         'commissions',
+        'commissions_network',
+        'commissions_webmaster',
         'is_subdomain',
         'member_id',
         'impressions',

@@ -20,6 +20,16 @@ Route::group([
             ])->wherePrimaryKey();
         });
 
+        Route::group([
+            'prefix' => 'kycs', 'as' => 'kyc.',
+        ], function () {
+            Route::resource('', 'KycController')->parameters(['' => 'kyc']);
+        });
+
+        Route::group(['prefix' => 'invoices', 'as' => 'invoice.'], function () {
+            Route::resource('', 'InvoiceController')->parameters(['' => 'invoice']);
+        });
+
         Route::group(['prefix' => 'settings', 'as' => 'member.'], function (): void {
             Route::get('members', [
                 'as' => 'settings',
@@ -42,3 +52,4 @@ Route::group([
         });
     }
 });
+

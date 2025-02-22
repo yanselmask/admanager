@@ -63,6 +63,55 @@ class AdmanagerSettingForm extends SettingForm
             'this_year' => __('This Year'),
         ];
 
+        $fieldName = [
+            [
+                'type' => 'text',
+                'label' => trans('Name'),
+                'attributes' => [
+                    'name' => 'name',
+                    'value' => null,
+                    'options' => [
+                        'class' => 'form-control',
+                    ],
+                ],
+            ]
+        ];
+        $currencyFields = [
+            [
+                'type' => 'text',
+                'label' => trans('Name'),
+                'attributes' => [
+                    'name' => 'name',
+                    'value' => null,
+                    'options' => [
+                        'class' => 'form-control',
+                    ],
+                ],
+            ],
+            [
+                'type' => 'text',
+                'label' => trans('Code'),
+                'attributes' => [
+                    'name' => 'code',
+                    'value' => null,
+                    'options' => [
+                        'class' => 'form-control',
+                    ],
+                ],
+            ],
+            [
+                'type' => 'text',
+                'label' => trans('Symbol'),
+                'attributes' => [
+                    'name' => 'symbol',
+                    'value' => null,
+                    'options' => [
+                        'class' => 'form-control',
+                    ],
+                ],
+            ]
+        ];
+
         $this
             ->setSectionTitle(trans('Google Ad Manager'))
             ->setSectionDescription(trans('Configure your Google Ad manager'))
@@ -165,6 +214,54 @@ class AdmanagerSettingForm extends SettingForm
                 OnOffFieldOption::make()
                     ->label(__('KYC is required'))
                     ->value(setting('member_kyc_is_required', false))
+            )
+            ->add('kyc_fields',
+                \Botble\Base\Forms\Fields\MultiCheckListField::class,
+                MultiChecklistFieldOption::make()->label(__('Kyc fields'))
+                    ->choices([
+                        'name' => __('Name'),
+                        'last_name' => __('Last Name'),
+                        'address' => __('Address'),
+                        'nationality' => __('Nationality'),
+                        'document_type' => __('Document Type'),
+                        'document_number' => __('Document Number'),
+                        'document_front' => __('Document Front'),
+                        'document_back' => __('Document Back'),
+                        'selfie' => __('Selfie'),
+                    ])
+                    ->multiple()
+                    ->selected(json_decode(setting('kyc_fields')))
+            )
+            ->add(
+                'kyc_nationalities',
+                RepeaterField::class,
+                RepeaterFieldOption::make()
+                    ->label(trans('Kyc Nationalities'))
+                    ->value(setting('kyc_nationalities', []))
+                    ->fields($fieldName)
+            )
+            ->add(
+                'kyc_documents_types',
+                RepeaterField::class,
+                RepeaterFieldOption::make()
+                    ->label(trans('Kyc Documents Type'))
+                    ->value(setting('kyc_documents_types', []))
+                    ->fields($fieldName)
+            )
+            ->add('invoice_prefix',
+                TextField::class,
+                TextFieldOption::make()->label(__('Invoice Prefix'))
+                    ->value(setting('invoice_prefix'))
+                    ->required()
+                    ->helperText(__('Ingrese el prefijo de sus facturas'))
+            )
+            ->add(
+                'invoices_currencies',
+                RepeaterField::class,
+                RepeaterFieldOption::make()
+                    ->label(trans('Invoices Currencies'))
+                    ->value(setting('invoices_currencies', []))
+                    ->fields($currencyFields)
             );
     }
 }
