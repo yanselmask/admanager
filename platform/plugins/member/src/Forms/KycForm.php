@@ -22,7 +22,7 @@ class KycForm extends FormAbstract
 {
     public function setup(): void
     {
-        $fields = json_decode(setting('kyc_fields',[]));
+        $fields = setting('kyc_fields') ? json_decode(setting('kyc_fields')) : [];
 
         $dtypes = \Arr::mapWithKeys(\Arr::flatten(json_decode(setting('kyc_documents_types',[])), 2), function($key){
             return [str_replace(' ', '_', strtolower($key->value)) => $key->value];
