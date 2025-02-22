@@ -35,7 +35,6 @@ Artisan::command('generate:report', function () {
         }
 
     }
-//    \Botble\Admanager\Services\Admanager::main('today','TODAY','today');
     $this->info('Generated report successfully!');
 });
 
