@@ -25,19 +25,21 @@
             </div>
         </div>
     </div>
-    @if(json_decode(setting('earning_member')) && (request()->query('graf') == '' || request()->query('graf') == 'earning'))
+    @if(json_decode(setting('earning_member')) && (request()->query('graf') == '' || request()->query('graf') == 'ganancias'))
     <x-core::stat-widget class="mb-3 row-cols-1 row-cols-sm-2 row-cols-md-3">
         @foreach(json_decode(setting('earning_member')) as $key)
             <x-core::stat-widget.item
                 :label="trans('Ganancias de :key',['key' => ucfirst(str_replace('_', ' ', $key))])"
                 :value="$domain->getEarning($key)"
+                :value2="$domain->commissions_network ? __('Ganancias de la network: :earning',['earning' => $domain->getEarningInverse($key, $domain->commissions_network)]) : false"
+                :value3="$domain->commissions ? __('Ganancias de la plataforma: :earning',['earning' => $domain->getEarningInverse($key, $domain->commissions)]) : false"
                 icon="ti ti-cash-banknote"
                 color="secondary"
             />
         @endforeach
     </x-core::stat-widget>
     @endif
-    @if(json_decode(setting('impressions_member')) && request()->query('graf') == 'impressions')
+    @if(json_decode(setting('impressions_member')) && request()->query('graf') == 'impresiones')
     <x-core::stat-widget class="mb-3 row-cols-1 row-cols-sm-2 row-cols-md-3">
         @foreach(json_decode(setting('impressions_member')) as $key)
             <x-core::stat-widget.item
@@ -86,7 +88,6 @@
 </x-core::stat-widget>
     @endif
     @endif
-    <activity-log-component></activity-log-component>
 @stop
 @push('scripts')
     <script>

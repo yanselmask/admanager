@@ -13,3 +13,13 @@ if(!function_exists('getValueWithCommissions'))
     }
 }
 
+if(!function_exists('getValueWithCommissionsInverse'))
+{
+    function getValueWithCommissionsInverse($value, $commission, $withSymbol = true)
+    {
+        if($withSymbol) {
+            return Number::currency(($value / 1000000) * (($commission) / 100));
+        }
+    }
+}
+

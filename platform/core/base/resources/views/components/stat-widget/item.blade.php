@@ -1,6 +1,8 @@
 @props([
     'label',
     'value' => 0,
+    'value2' => 0,
+    'value3' => 0,
     'icon' => null,
     'url' => null,
     'color' => 'primary',
@@ -31,13 +33,19 @@
         <div class="d-flex justify-content-between align-items-center">
             <div class="details px-4 py-3 d-flex flex-column justify-content-between">
                 <div class="desc fw-medium">{{ $label }}</div>
-                <div class="number fw-bolder">
+                <div class=" fw-bolder" style="font-size: 2rem">
                     @if (is_int($value))
                         <span data-counter="counterup" data-value="{{ $value }}">0</span>
                     @else
                         <span>{{ $value }}</span>
                     @endif
                 </div>
+                @if($value2)
+                <span>{{$value2}}</span>
+                @endif
+                @if($value3)
+                    <span>{{$value3}}</span>
+                @endif
             </div>
             <div class="visual ps-1 position-absolute end-0">
                 @if($icon)

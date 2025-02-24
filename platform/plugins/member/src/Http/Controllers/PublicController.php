@@ -96,7 +96,29 @@ class PublicController extends BaseController
 
         $domain = Domain::where('member_id', $user->id)->first();
 
-        $optionsGraf = ['earning', 'impressions', 'clicks', 'ctrs', 'ecpm'];
+        $optionsGraf = [];
+
+        if(json_decode(setting('earning_member')))
+        {
+            array_push($optionsGraf, 'ganancias');
+        }
+        if(json_decode(setting('impressions_member')))
+        {
+            array_push($optionsGraf, 'impresiones');
+        }
+        if(json_decode(setting('clicks_member')))
+        {
+            array_push($optionsGraf, 'clicks');
+        }
+        if(json_decode(setting('ctrs_member')))
+        {
+            array_push($optionsGraf, 'ctrs');
+        }
+        if(json_decode(setting('ecpms_member')))
+        {
+            array_push($optionsGraf, 'ecpm');
+        }
+
 
         if($dname = request()->input('domain'))
         {
@@ -108,7 +130,7 @@ class PublicController extends BaseController
             }
         }
 
-        $this->pageTitle(__('Dashboard'));
+        $this->pageTitle(__('Estadisticas'));
 
         Assets::addScriptsDirectly('vendor/core/plugins/member/js/dashboard/activity-logs.js');
         Assets::usingVueJS();
@@ -368,7 +390,7 @@ class PublicController extends BaseController
     public function getReferrals()
     {
 
-        $this->pageTitle(__('Referrals'));
+        $this->pageTitle(__('Referidos'));
 
         $user = auth('member')->user();
 
@@ -410,7 +432,7 @@ class PublicController extends BaseController
 
     public function getInvoices()
     {
-        $this->pageTitle(__('Invoices'));
+        $this->pageTitle(__('Pagos'));
         $user = auth('member')->user();
         $invoices = Invoice::query()->where('member_id', auth('member')->id())->latest()->paginate();
 

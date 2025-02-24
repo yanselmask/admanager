@@ -53,3 +53,29 @@ Artisan::command('generate:report:custom {date}', function () {
             ->run();
     }
 });
+
+Artisan::command('generate:invoice',function(){
+    \Botble\Domain\Models\Domain::query()
+        ->whereHas('member')
+        ->chunk(200, function ($domains){
+            $domains->each(function ($domain){
+                try {
+                    $invoice = new \Botble\Member\Models\Invoice();
+                    $invoice->name = generate_invoice();
+                    $invoice->invoice_date = now();
+                    $invoice->amount = (int) str_replace('$','',$domain->getEarning('last_month'));
+                    $invoice->currency = 'USD';
+                    $invoice->member_id = $domain->member_id;
+                    $invoice->save();
+
+                    MetaBox::saveMetaBoxData($invoice, 'notes', $domain->url);
+                    $this->info('Factura generada');
+                }catch (Exception $exception)
+                {
+                    $this->error($exception->getMessage());
+                }
+
+            });
+        });
+
+});

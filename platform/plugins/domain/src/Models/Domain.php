@@ -43,9 +43,15 @@ class Domain extends BaseModel
         return $this->belongsTo(Member::class, 'member_id');
     }
 
-    public function getEarning($column)
+    public function getEarning($column, $com = null)
     {
-        return isset($this->earnings[$column]) ? getValueWithCommissions($this->earnings[$column], $this->commissions ?? setting('percentage_default')) : null;
+        $comission = $com ?? ($this->commissions ?? setting('percentage_default'));
+        return isset($this->earnings[$column]) ? getValueWithCommissions($this->earnings[$column], $comission) : null;
+    }
+
+    public function getEarningInverse($column, $com = null)
+    {
+        return isset($this->earnings[$column]) ? getValueWithCommissionsInverse($this->earnings[$column], $com) : null;
     }
 
     public function getImpressions($column)

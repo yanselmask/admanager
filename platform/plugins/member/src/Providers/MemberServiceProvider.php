@@ -5,11 +5,15 @@ namespace Botble\Member\Providers;
 use Botble\Api\Facades\ApiHelper;
 use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Facades\EmailHandler;
+use Botble\Base\Facades\MetaBox;
 use Botble\Base\Facades\PanelSectionManager;
 use Botble\Base\Forms\FieldOptions\HiddenFieldOption;
 use Botble\Base\Forms\FieldOptions\SelectFieldOption;
+use Botble\Base\Forms\FieldOptions\TextareaFieldOption;
 use Botble\Base\Forms\Fields\HiddenField;
 use Botble\Base\Forms\Fields\SelectField;
+use Botble\Base\Forms\Fields\TextareaField;
+use Botble\Base\Forms\Fields\TextField;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Base\PanelSections\PanelSectionItem;
@@ -20,6 +24,7 @@ use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Blog\Forms\PostForm;
 use Botble\Language\Facades\Language;
 use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
+use Botble\Member\Forms\Fronts\Auth\FieldOptions\TextFieldOption;
 use Botble\Member\Forms\Fronts\Auth\ForgotPasswordForm;
 use Botble\Member\Forms\Fronts\Auth\LoginForm;
 use Botble\Member\Forms\Fronts\Auth\RegisterForm;
@@ -32,6 +37,7 @@ use Botble\Member\Http\Requests\Fronts\Auth\ForgotPasswordRequest;
 use Botble\Member\Http\Requests\Fronts\Auth\LoginRequest;
 use Botble\Member\Http\Requests\Fronts\Auth\RegisterRequest;
 use Botble\Member\Http\Requests\Fronts\Auth\ResetPasswordRequest;
+use Botble\Member\Models\Invoice;
 use Botble\Member\Models\Member;
 use Botble\Member\Models\MemberActivityLog;
 use Botble\Member\Repositories\Eloquent\MemberActivityLogRepository;
@@ -142,7 +148,7 @@ class MemberServiceProvider extends ServiceProvider
                     DashboardMenuItem::make()
                         ->id('cms-member-dashboard')
                         ->priority(10)
-                        ->name('plugins/member::member.dashboard')
+                        ->name('Estadisticas')
                         ->url(fn () => route('public.member.dashboard'))
                         ->icon('ti ti-home')
                 )
@@ -150,7 +156,7 @@ class MemberServiceProvider extends ServiceProvider
                     DashboardMenuItem::make()
                         ->id('cms-member-referrals')
                         ->priority(20)
-                        ->name('Referrals')
+                        ->name('Referidos')
                         ->url(fn () => route('public.member.referrals'))
                         ->icon('ti ti-users')
                 )
@@ -158,7 +164,7 @@ class MemberServiceProvider extends ServiceProvider
                     DashboardMenuItem::make()
                         ->id('cms-member-invoices')
                         ->priority(30)
-                        ->name('Payments')
+                        ->name('Pagos')
                         ->url(fn () => route('public.member.invoices'))
                         ->icon('ti ti-invoice')
                 )
@@ -166,7 +172,7 @@ class MemberServiceProvider extends ServiceProvider
                     DashboardMenuItem::make()
                         ->id('cms-member-support')
                         ->priority(40)
-                        ->name('Support')
+                        ->name('Soporte')
                         ->when(setting('support_number') && setting('support_message'))
                         ->url(fn () => "https://api.whatsapp.com/send?phone=" . rawurlencode(setting('support_number')) .
                                "&text=" . rawurlencode(setting('support_message'))
@@ -177,7 +183,7 @@ class MemberServiceProvider extends ServiceProvider
                     DashboardMenuItem::make()
                         ->id('cms-member-settings')
                         ->priority(50)
-                        ->name('plugins/member::dashboard.header_settings_link')
+                        ->name('Configuración')
                         ->url(fn () => route('public.member.settings'))
                         ->icon('ti ti-settings')
                 );
@@ -371,6 +377,46 @@ class MemberServiceProvider extends ServiceProvider
 
             return $data;
         }, 49);
+
+        add_filter(BASE_FILTER_BEFORE_RENDER_FORM, function ($form, $data) {
+            if ($data instanceof Invoice) {
+                $notes = $data->getMetaData('notes', true);
+
+                $form
+                    ->add(
+                        'notes',
+                        TextareaField::class,
+                        TextareaFieldOption::make()
+                            ->label(__('Notes'))
+                            ->value($notes)
+                    );
+            }
+
+            if ($data instanceof Member && !auth('member')->check()) {
+                $notes = $data->getMetaData('commissions', true);
+
+                $form
+                    ->add(
+                        'commissions',
+                        TextField::class,
+                        TextFieldOption::make()
+                            ->label(__('Comisiones'))
+                            ->value($notes)
+                    );
+            }
+
+            return $form;
+        }, 120, 2);
+
+        add_action([BASE_ACTION_AFTER_CREATE_CONTENT, BASE_ACTION_AFTER_UPDATE_CONTENT], function ($screen, $request, $data) {
+            if ($data instanceof Invoice) {
+                MetaBox::saveMetaBoxData($data, 'notes', $request->input('notes'));
+            }
+
+            if ($data instanceof Member) {
+                MetaBox::saveMetaBoxData($data, 'commissions', $request->input('commissions'));
+            }
+        }, 120, 3);
     }
 
     public function setInAdmin(bool $isInAdmin): bool

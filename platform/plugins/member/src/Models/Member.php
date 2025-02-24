@@ -175,4 +175,9 @@ class Member extends BaseModel implements
     {
         return $this->hasMany(Invoice::class);
     }
+
+    public function getTotalMonthInvoicesAttribute(): ?int
+    {
+        return 10;
+    }
 }
