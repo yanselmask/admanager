@@ -165,7 +165,7 @@ class AdmanagerSettingForm extends SettingForm
                  MultiChecklistFieldOption::make()->label(__('Earning'))
                     ->choices($choices)
                     ->multiple()
-                    ->selected(json_decode(setting('earning_member')))
+                    ->selected(setting('earning_member') ? json_decode(setting('earning_member')) : '')
             )
             ->add('impressions_member',
                 \Botble\Base\Forms\Fields\MultiCheckListField::class,
@@ -250,7 +250,6 @@ class AdmanagerSettingForm extends SettingForm
                 TextField::class,
                 TextFieldOption::make()->label(__('Invoice Prefix'))
                     ->value(setting('invoice_prefix'))
-                    ->required()
                     ->helperText(__('Ingrese el prefijo de sus facturas'))
             )
             ->add(

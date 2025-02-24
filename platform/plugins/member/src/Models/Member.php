@@ -100,6 +100,11 @@ class Member extends BaseModel implements
         return $this->hasMany(Member::class, 'ref_by', 'id');
     }
 
+    public function refByMe()
+    {
+        return $this->belongsTo(Member::class, 'ref_by', 'id');
+    }
+
     public function posts(): MorphMany
     {
         return $this->morphMany('Botble\Blog\Models\Post', 'author');

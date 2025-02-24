@@ -22,7 +22,7 @@ class AdmanagerSettingController extends SettingController
     {
         if(!$request->$key)
         {
-            setting()->set($key, []);
+            setting()->set($key, null);
         }
     }
 
@@ -32,7 +32,7 @@ class AdmanagerSettingController extends SettingController
         {
             $adsapi = storage_path('adsapi_php.ini');
             $contenido = file_get_contents($adsapi);
-            $nuevaRuta = 'jsonKeyFilePath = "' . Storage::url(setting('admanager_json'))  .'"';
+            $nuevaRuta = 'jsonKeyFilePath = "' . Storage::path(setting('admanager_json'))  .'"';
             $contenidoModificado = preg_replace(
                 '/jsonKeyFilePath\s*=\s*".*?"/',
                 $nuevaRuta,

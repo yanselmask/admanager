@@ -392,7 +392,7 @@ class MemberServiceProvider extends ServiceProvider
                     );
             }
 
-            if ($data instanceof Member && !auth('member')->check()) {
+            if ($data instanceof Member && str_contains(request()->path(), 'admin')) {
                 $notes = $data->getMetaData('commissions', true);
 
                 $form

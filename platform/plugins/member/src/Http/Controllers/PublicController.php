@@ -389,10 +389,9 @@ class PublicController extends BaseController
 
     public function getReferrals()
     {
-
-        $this->pageTitle(__('Referidos'));
-
         $user = auth('member')->user();
+
+        $this->pageTitle(__('Referidos - $:balance', ['balance' => (int) $user->getMetaData('balances', true)]));
 
         $referrals = $user->referrals()->paginate();
 
