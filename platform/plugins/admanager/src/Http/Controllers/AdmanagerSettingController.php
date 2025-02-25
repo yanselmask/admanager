@@ -26,13 +26,13 @@ class AdmanagerSettingController extends SettingController
         }
     }
 
-    public function update(AdmanagerRequest $request)
+    protected function changeFileOnAdsapi($newPath)
     {
-        if(setting('admanager_json') != $request->input('admanager_json'))
-        {
-            $adsapi = storage_path('adsapi_php.ini');
+        $adsapi = storage_path('adsapi_php.ini');
+
+        if (file_exists($adsapi)) {
             $contenido = file_get_contents($adsapi);
-            $nuevaRuta = 'jsonKeyFilePath = "' . Storage::path(setting('admanager_json'))  .'"';
+            $nuevaRuta = 'jsonKeyFilePath = "' . $newPath . '"';
             $contenidoModificado = preg_replace(
                 '/jsonKeyFilePath\s*=\s*".*?"/',
                 $nuevaRuta,
@@ -40,6 +40,23 @@ class AdmanagerSettingController extends SettingController
             );
 
             file_put_contents($adsapi, $contenidoModificado);
+        }
+    }
+
+    public function update(AdmanagerRequest $request)
+    {
+        if(setting('admanager_json') && setting('admanager_json') != $request->input('admanager_json'))
+        {
+            $oldPath = Storage::path(setting('admanager_json'));
+            $newPath = Storage::path($request->input('admanager_json'));
+            $this->changeFileOnAdsapi($newPath);
+            Storage::delete($oldPath);
+        }
+
+        if(empty(setting('admanager_json')))
+        {
+            $newPath = Storage::path($request->input('admanager_json'));
+            $this->changeFileOnAdsapi($newPath);
         }
 
         $this->clearIfNotExist($request, 'admanager_networks');
