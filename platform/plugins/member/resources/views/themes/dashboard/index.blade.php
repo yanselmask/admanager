@@ -32,7 +32,7 @@
                 :label="trans('Ganancias de :key',['key' => ucfirst(str_replace('_', ' ', $key))])"
                 :value="$domain->getEarning($key)"
                 :value2="$domain->commissions_network ? __('Ganancias de la network: :earning',['earning' => $domain->getEarningInverse($key, $domain->commissions_network)]) : false"
-                :value3="$domain->commissions_network ? __('Ganancias de la plataforma: :earning',['earning' => $domain->getEarningInverse($key, $domain->commissions)]) : false"
+                :value3="$domain->commissions_network ? __('Ganancias de la plataforma: :earning',['earning' => $domain->getEarningInverse($key, ($domain->commissions - $domain->commissions_network))]) : false"
                 icon="ti ti-cash-banknote"
                 color="secondary"
             />

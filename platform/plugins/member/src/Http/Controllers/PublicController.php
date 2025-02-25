@@ -132,8 +132,7 @@ class PublicController extends BaseController
 
         $this->pageTitle(__('Estadisticas'));
 
-        Assets::addScriptsDirectly('vendor/core/plugins/member/js/dashboard/activity-logs.js');
-        Assets::usingVueJS();
+        Assets::addScriptsDirectly('vendor/core/core/base/libraries/ckeditor/ckeditor.js');
 
         return view('plugins/member::themes.dashboard.index', compact('user','domain','optionsGraf'));
     }

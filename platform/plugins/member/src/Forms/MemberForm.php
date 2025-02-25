@@ -85,19 +85,17 @@ class MemberForm extends FormAbstract
                     ->label(trans('plugins/member::member.dob'))
                     ->colspan(1)
             )
-            ->when(auth('member')->user()->domains->count(),function($form){
-                $form->add('payment_method_default',
-                    SelectField::class,
-                    SelectFieldOption::make()
-                        ->label(trans('Payment Method'))
-                        ->choices([
-                            'paypal' => __('Paypal'),
-                            'usdt_trc20' => __('USDT TRC20'),
-                            'usdt_bep20' => __('USDT BEP20'),
-                            'bank' => __('Bank')
-                        ])
-                );
-            })
+            ->add('payment_method_default',
+                SelectField::class,
+                SelectFieldOption::make()
+                    ->label(trans('Payment Method'))
+                    ->choices([
+                        'paypal' => __('Paypal'),
+                        'usdt_trc20' => __('USDT TRC20'),
+                        'usdt_bep20' => __('USDT BEP20'),
+                        'bank' => __('Bank')
+                    ])
+            )
             ->add(
                 'description',
                 TextareaField::class,

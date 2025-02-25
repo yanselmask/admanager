@@ -12,6 +12,7 @@ use Botble\Table\BulkChanges\EmailBulkChange;
 use Botble\Table\BulkChanges\NameBulkChange;
 use Botble\Table\Columns\CreatedAtColumn;
 use Botble\Table\Columns\EmailColumn;
+use Botble\Table\Columns\FormattedColumn;
 use Botble\Table\Columns\IdColumn;
 use Botble\Table\Columns\ImageColumn;
 use Botble\Table\Columns\NameColumn;
@@ -34,6 +35,9 @@ class MemberTable extends TableAbstract
                     ->relative(),
                 NameColumn::make()->route('member.edit')->orderable(false),
                 EmailColumn::make()->linkable(),
+                FormattedColumn::make('domains')->getValueUsing(function($column){
+                   return $column->getItem()->domains->count();
+                }),
                 CreatedAtColumn::make(),
             ])
             ->addActions([
