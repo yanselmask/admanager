@@ -46,7 +46,7 @@ class Domain extends BaseModel
     public function getEarning($column, $com = null)
     {
         $comission = $com ?? ($this->commissions ?? setting('percentage_default'));
-        return isset($this->earnings[$column]) ? getValueWithCommissions($this->earnings[$column], $comission, includePercentage: setting('include_percentage_in_earning', false)) : null;
+        return isset($this->earnings[$column]) ? getValueWithCommissions($this->earnings[$column], $comission) : null;
     }
 
     public function getEarningInverse($column, $com = null)

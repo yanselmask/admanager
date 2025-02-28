@@ -167,12 +167,6 @@ class AdmanagerSettingForm extends SettingForm
                     ->multiple()
                     ->selected(setting('earning_member') ? json_decode(setting('earning_member')) : '')
             )
-            ->add('include_percentage_in_earning',
-                OnOffField::class,
-                OnOffFieldOption::make()
-                    ->label(__('Incluir porcentaje en Ganancias'))
-                    ->value(setting('include_percentage_in_earning', false))
-            )
             ->add('impressions_member',
                 \Botble\Base\Forms\Fields\MultiCheckListField::class,
                 MultiChecklistFieldOption::make()->label(__('Impressions'))
