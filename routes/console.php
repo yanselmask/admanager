@@ -64,7 +64,7 @@ Artisan::command('generate:invoice',function(){
                     $invoice = new \Botble\Member\Models\Invoice();
                     $invoice->name = generate_invoice();
                     $invoice->invoice_date = now();
-                    $invoice->amount = (double) str_replace('$','',$domain->getEarning('last_month'));
+                    $invoice->amount = (float) str_replace(['$', ','], '', $domain->getEarning('last_month'));
                     $invoice->currency = $currency;
                     $invoice->member_id = $domain->member_id;
                     $invoice->save();
