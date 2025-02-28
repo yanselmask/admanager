@@ -28,7 +28,12 @@ class AdmanagerRequest extends Request
             'kyc_nationalities' => 'nullable',
             'kyc_documents_types' => 'nullable',
             'invoice_prefix' => 'nullable',
-            'invoices_currencies' => 'nullable'
+            'invoices_currencies' => 'nullable',
+            'include_percentage_in_earning' => 'nullable',
+            'include_percentage_in_impressions' => 'nullable',
+            'include_percentage_in_clicks' => 'nullable',
+            'include_percentage_in_ctrs' => 'nullable',
+            'include_percentage_in_ecpm' => 'nullable'
         ];
     }
 }

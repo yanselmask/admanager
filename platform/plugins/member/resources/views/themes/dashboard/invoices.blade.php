@@ -18,7 +18,7 @@
             <th scope="row">{{$invoice->id}}</th>
             <td>{{$invoice->name}}</td>
             <td>{{$invoice->invoice_date?->format('M d, Y')}}</td>
-            <td>{{str(get_currency_code($invoice->currency)['symbol'])->append(number_format($invoice->amount, 2))}}</td>
+            <td>{{str(isset(get_currency_code($invoice->currency)['symbol']) ? get_currency_code($invoice->currency)['symbol'] : 'USD`')->append(number_format($invoice->amount, 2))}}</td>
             <td>{{$invoice->getMetaData('notes', true)}}</td>
             <td>{!! \Botble\Member\Enums\InvoiceStatus::badge($invoice->status) !!}</td>
         </tr>

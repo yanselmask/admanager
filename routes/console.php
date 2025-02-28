@@ -59,15 +59,17 @@ Artisan::command('generate:invoice',function(){
         ->whereHas('member')
         ->chunk(200, function ($domains){
             $domains->each(function ($domain){
-                $currency = 'DOP';
+                $currency = 'USD';
                 try {
                     $invoice = new \Botble\Member\Models\Invoice();
                     $invoice->name = generate_invoice();
                     $invoice->invoice_date = now();
-                    $invoice->amount = (int) str_replace('$','',$domain->getEarning('last_month'));
+                    $invoice->amount = (double) str_replace('$','',$domain->getEarning('last_month'));
                     $invoice->currency = $currency;
                     $invoice->member_id = $domain->member_id;
                     $invoice->save();
+
+                    MetaBox::saveMetaBoxData($invoice, 'notes', $domain->url);
 
                     $ref = $domain->member?->refByMe;
 
@@ -88,8 +90,6 @@ Artisan::command('generate:invoice',function(){
                         MetaBox::saveMetaBoxData($ref, 'balances', $newBalance);
                         MetaBox::saveMetaBoxData($invoice2, 'notes', __('Ganancias por referido de :site', ['site' => $domain->url]));
                     }
-
-                    MetaBox::saveMetaBoxData($invoice, 'notes', $domain->url);
 
                     $this->info('Factura generada');
                 }catch (Exception $exception)

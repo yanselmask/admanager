@@ -167,12 +167,24 @@ class AdmanagerSettingForm extends SettingForm
                     ->multiple()
                     ->selected(setting('earning_member') ? json_decode(setting('earning_member')) : '')
             )
+            ->add('include_percentage_in_earning',
+                OnOffField::class,
+                OnOffFieldOption::make()
+                    ->label(__('Incluir porcentaje en Ganancias'))
+                    ->value(setting('include_percentage_in_earning', false))
+            )
             ->add('impressions_member',
                 \Botble\Base\Forms\Fields\MultiCheckListField::class,
                 MultiChecklistFieldOption::make()->label(__('Impressions'))
                     ->choices($choices)
                     ->multiple()
                     ->selected(json_decode(setting('impressions_member')))
+            )
+            ->add('include_percentage_in_impressions',
+                OnOffField::class,
+                OnOffFieldOption::make()
+                    ->label(__('Incluir porcentaje en Impresiones'))
+                    ->value(setting('include_percentage_in_impressions', false))
             )
             ->add('clicks_member',
                 \Botble\Base\Forms\Fields\MultiCheckListField::class,
@@ -181,6 +193,12 @@ class AdmanagerSettingForm extends SettingForm
                     ->multiple()
                     ->selected(json_decode(setting('clicks_member')))
             )
+            ->add('include_percentage_in_clicks',
+                OnOffField::class,
+                OnOffFieldOption::make()
+                    ->label(__('Incluir porcentaje en Clicks'))
+                    ->value(setting('include_percentage_in_clicks', false))
+            )
             ->add('ctrs_member',
                 \Botble\Base\Forms\Fields\MultiCheckListField::class,
                 MultiChecklistFieldOption::make()->label(__('Ctrs'))
@@ -188,12 +206,24 @@ class AdmanagerSettingForm extends SettingForm
                     ->multiple()
                     ->selected(json_decode(setting('ctrs_member')))
             )
+            ->add('include_percentage_in_ctrs',
+                OnOffField::class,
+                OnOffFieldOption::make()
+                    ->label(__('Incluir porcentaje en Ctrs'))
+                    ->value(setting('include_percentage_in_ctrs', false))
+            )
             ->add('ecpms_member',
                 \Botble\Base\Forms\Fields\MultiCheckListField::class,
                 MultiChecklistFieldOption::make()->label(__('Ecpms'))
                     ->multiple()
                     ->choices($choices)
                     ->selected(json_decode(setting('ecpms_member')))
+            )
+            ->add('include_percentage_in_ecpm',
+                OnOffField::class,
+                OnOffFieldOption::make()
+                    ->label(__('Incluir porcentaje en Ecpm'))
+                    ->value(setting('include_percentage_in_ecpm', false))
             )
             ->add('support_number',
                 TextField::class,
