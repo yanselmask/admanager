@@ -13,16 +13,18 @@
                         @endif
                 </div>
             </div>
-            @if($link = $shortcode->youtube_link)
+            @if($link = $shortcode->youtube_link || $img = $shortcode->youtube_image)
             <div class="col-lg-7">
                 <div class="saas_banner_img wow fadeInRight" data-wow-delay="0.2s">
                     @if($img = $shortcode->youtube_image)
                     <img src="{{RvMedia::getImageUrl($img)}}" alt="">
                     @endif
+                    @if($link = $shortcode->youtube_link )
                     <a href="{{$link}}"
                        class="video_popup popup-youtube">
                         <i class="fa fa-play"></i>
                     </a>
+                    @endif
                 </div>
             </div>
                 @endif
