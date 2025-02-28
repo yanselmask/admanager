@@ -17,10 +17,11 @@ if(!function_exists('generate_invoice'))
     function generate_invoice()
     {
         $prefix = setting('invoice_prefix', 'INV');
-        $invoiceNumber = (\Botble\Member\Models\Invoice::latest()->first()?->id ?? 0 ) + 1;
+
+        $lastInvoice = \Botble\Member\Models\Invoice::latest('id')->first();
+        $invoiceNumber = $lastInvoice ? ((int) $lastInvoice->id + 1) : 1;
 
         return $prefix . str_pad($invoiceNumber, 6, "0", STR_PAD_LEFT);
-
     }
 }
 

@@ -71,33 +71,33 @@ Artisan::command('generate:invoice',function(){
 
                     MetaBox::saveMetaBoxData($invoice, 'notes', $domain->url);
 
-                    $ref = $domain->member?->refByMe;
-
-                    if($ref)
-                    {
-                        $comRef = (int) ($ref->getMetaData('commissions', true) ?? setting('referral_commissions', true) );
-                        $com = ( ($comRef * $invoice->amount) / 100);
-                        $newBalance = $ref->getMetaData('balances', true) + $com;
-
-                        $invoice2 = new \Botble\Member\Models\Invoice();
-                        $invoice2->name = generate_invoice();
-                        $invoice2->invoice_date = now();
-                        $invoice2->amount = (int) $com;
-                        $invoice2->currency = $currency;
-                        $invoice2->member_id = $ref->id;
-                        $invoice2->save();
-
-                        MetaBox::saveMetaBoxData($ref, 'balances', $newBalance);
-                        MetaBox::saveMetaBoxData($invoice2, 'notes', __('Ganancias por referido de :site', ['site' => $domain->url]));
-                    }
-
-                    $this->info('Factura generada');
                 }catch (Exception $exception)
                 {
                     $this->error($exception->getMessage());
                 }
 
+                $ref = $domain->member?->refByMe;
+
+                if($ref)
+                {
+                    $comRef = (int) ($ref->getMetaData('commissions', true) ?? setting('referral_commissions', true) );
+                    $com = ( ($comRef * $invoice->amount) / 100);
+                    $newBalance = $ref->getMetaData('balances', true) + $com;
+
+                    $invoice2 = new \Botble\Member\Models\Invoice();
+                    $invoice2->name = generate_invoice();
+                    $invoice2->invoice_date = now();
+                    $invoice2->amount = (int) $com;
+                    $invoice2->currency = $currency;
+                    $invoice2->member_id = $ref->id;
+                    $invoice2->save();
+
+                    MetaBox::saveMetaBoxData($ref, 'balances', $newBalance);
+                    MetaBox::saveMetaBoxData($invoice2, 'notes', __('Ganancias por referido de :site', ['site' => $domain->url]));
+                }
+
+                $this->info('Factura generada');
+
             });
         });
-
 });
