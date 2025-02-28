@@ -19,6 +19,7 @@ sftp-config.json
 _ide_helper_models.php
 /storage/app/backup
 /storage/cache_keys.json
+storage/adsapi_php.ini
 
 __MACOSX
 /.phpintel

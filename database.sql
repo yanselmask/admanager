@@ -1081,15 +1081,6 @@ CREATE TABLE `members` (
 ) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
---
--- Dumping data for table `members`
---
-
-LOCK TABLES `members` WRITE;
-/*!40000 ALTER TABLE `members` DISABLE KEYS */;
-INSERT INTO `members` VALUES (1,'Jasen','Bosco',NULL,NULL,'member@gmail.com','$2y$12$s/sNE4j2SshRwseIhsunROe8qaOvA6PIoiSe1OzGRAvj1zMEhe1KW',21,NULL,NULL,'2025-01-19 02:11:19',NULL,NULL,'2025-01-18 19:11:19','2025-01-18 19:11:19','published'),(2,'Janessa','Howell',NULL,NULL,'jnitzsche@johnson.com','$2y$12$6wC7kjecidEBa5fsXDz8E.Lg2OvgRQiiXMZ.cgWmXVqLUYWdg4HKm',22,NULL,NULL,'2025-01-19 02:11:19',NULL,NULL,'2025-01-18 19:11:19','2025-01-18 19:11:19','published'),(3,'Delpha','Quigley',NULL,NULL,'prudence20@hyatt.biz','$2y$12$Wv4t97H661LtanLWTUWMmOeoAnmihBqRStjVQTZPsjFp4lqOJOVFG',23,NULL,NULL,'2025-01-19 02:11:19',NULL,NULL,'2025-01-18 19:11:19','2025-01-18 19:11:19','published'),(4,'Agustina','Goyette',NULL,NULL,'franecki.colin@moen.biz','$2y$12$LYS31AtPcAbwbz2MsYm4ZuKGFt6O.EGGEkIA3KI5Pcraho.jJP9Lm',24,NULL,NULL,'2025-01-19 02:11:19',NULL,NULL,'2025-01-18 19:11:19','2025-01-18 19:11:19','published'),(5,'Lilly','Hoeger',NULL,NULL,'dietrich.ena@yahoo.com','$2y$12$jdgqPxGFn28j2zQg4pczKu0btXvLHBZrRUyrkvvGUb8alqxjbDdky',25,NULL,NULL,'2025-01-19 02:11:19',NULL,NULL,'2025-01-18 19:11:19','2025-01-18 19:11:19','published'),(6,'Carroll','Pagac',NULL,NULL,'schumm.candido@gmail.com','$2y$12$TeFbwx7KPtKnbIACwMt0CuUxkq89Yknxrqw4Msque.aUubSTG5.HG',26,NULL,NULL,'2025-01-19 02:11:19',NULL,NULL,'2025-01-18 19:11:19','2025-01-18 19:11:19','published'),(7,'Maryjane','Rath',NULL,NULL,'martina.sporer@ratke.com','$2y$12$SGB36noVHuZuLEg4lULAeOB1rJ3yO6V.v/Co7kS3RXpRsBMrS6ecq',27,NULL,NULL,'2025-01-19 02:11:19',NULL,NULL,'2025-01-18 19:11:19','2025-01-18 19:11:19','published'),(8,'Anahi','Hirthe',NULL,NULL,'cecilia77@ratke.biz','$2y$12$Rxa8mE75LdlkD/7Pi2Ow7ehXX4uy5iW.4v0ovHPImiaM4ZZDUmK3K',28,NULL,NULL,'2025-01-19 02:11:19',NULL,NULL,'2025-01-18 19:11:19','2025-01-18 19:11:19','published'),(9,'Calista','Prohaska',NULL,NULL,'ufahey@hotmail.com','$2y$12$cAe021mBf5BOSioCZa37TeoeEUDykpwqZDB..PZHgesPMl1uZL/wu',29,NULL,NULL,'2025-01-19 02:11:19',NULL,NULL,'2025-01-18 19:11:19','2025-01-18 19:11:19','published'),(10,'Lydia','Jones',NULL,NULL,'creola17@kemmer.com','$2y$12$3IOeKgJuNDj3dTtOWMUKTusn.dM8UNNi7JgZFrrypls.OEC69qSgi',30,NULL,NULL,'2025-01-19 02:11:19',NULL,NULL,'2025-01-18 19:11:19','2025-01-18 19:11:19','published'),(11,'John','Smith',NULL,NULL,'john.smith@botble.com','$2y$12$RC8PUePRhfXwascQ8nuu5.nx/8lrruvnPmg6u4fXOexONa1X0Wwd6',31,NULL,NULL,'2025-01-19 02:11:19',NULL,NULL,'2025-01-18 19:11:19','2025-01-18 19:11:19','published');
-/*!40000 ALTER TABLE `members` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `menu_locations`

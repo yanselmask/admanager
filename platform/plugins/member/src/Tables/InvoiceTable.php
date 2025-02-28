@@ -52,6 +52,11 @@ class InvoiceTable extends TableAbstract
                     ->getValueUsing(function(FormattedColumn $column){
                         return $column->getItem()->member?->first_name . ' ' . $column->getItem()->member?->last_name;
                     }),
+                FormattedColumn::make('notes')
+                    ->label(__('Notes'))
+                    ->getValueUsing(function(FormattedColumn $column){
+                        return $column->getItem()->getMetaData('notes', true);
+                    }),
                 CreatedAtColumn::make(),
                 FormattedColumn::make('status')
                     ->label(__('Status'))
