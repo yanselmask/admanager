@@ -35,12 +35,12 @@ class DomainTable extends TableAbstract
             ])
             ->addColumns([
                 IdColumn::make(),
-//                Column::make('member.first_name')
-//                    ->label(__('First Name'))
-//                    ->hidden(),
-//                Column::make('member.last_name')
-//                    ->label(__('Last Name'))
-//                    ->hidden(),
+                Column::make('member.first_name')
+                    ->label(__('First Name'))
+                    ->hidden(),
+                Column::make('member.last_name')
+                    ->label(__('Last Name'))
+                    ->hidden(),
                 NameColumn::make()->route('domain.edit'),
                 NameColumn::make('url')->label(__('Url'))->route('domain.edit'),
                 NameColumn::make('network_code')->label(__('Network Code'))->route('domain.edit'),
@@ -72,7 +72,7 @@ class DomainTable extends TableAbstract
                     'member_id',
                     'created_at',
                     'status',
-                ]);
+                ])->with('member');
             });
     }
 }
