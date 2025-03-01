@@ -34,12 +34,14 @@ class InvoiceTable extends TableAbstract
             ])
             ->addColumns([
                 IdColumn::make(),
-                Column::make('name')->label(__('Invoice Number'))->route('invoice.edit'),
+                Column::make('name')
+                    ->label(__('Invoice Number'))
+                    ->route('invoice.edit'),
                 DateColumn::make('invoice_date')->label(__('Invoice Date'))->route('invoice.edit'),
                 FormattedColumn::make('currency')
                     ->label(__('Invoice Currency'))
                     ->getValueUsing(function(FormattedColumn $column){
-                        return get_currency_code($column->getItem()->currency)['symbol'];
+                        return get_currency_code($column->getItem()->currency)['code'];
                     }),
                 FormattedColumn::make('amount')
                     ->label(__('Invoice Amount'))
@@ -47,22 +49,28 @@ class InvoiceTable extends TableAbstract
                         return str(get_currency_code($column->getItem()->currency)['symbol'])->append(number_format($column->getItem()->amount, 2));
                     })
                 ,
+                Column::make('member.first_name')
+                    ->label(__('First Name'))
+                    ->hidden(),
+                Column::make('member.last_name')
+                    ->label(__('Last Name'))
+                    ->hidden(),
                 FormattedColumn::make('member_id')
                     ->label(__('Member'))
-                    ->getValueUsing(function(FormattedColumn $column){
-                        return $column->getItem()->member?->first_name . ' ' . $column->getItem()->member?->last_name;
+                    ->getValueUsing(function(FormattedColumn $column) {
+                        return optional($column->getItem()->member)->first_name . ' ' . optional($column->getItem()->member)->last_name;
                     }),
-                FormattedColumn::make('notes')
-                    ->label(__('Notes'))
-                    ->getValueUsing(function(FormattedColumn $column){
-                        return $column->getItem()->getMetaData('notes', true);
-                    }),
-                CreatedAtColumn::make(),
                 FormattedColumn::make('status')
                     ->label(__('Status'))
                     ->getValueUsing(function(FormattedColumn $column){
                         return InvoiceStatus::badge($column->getItem()->status);
                     }),
+                FormattedColumn::make('metadata.meta_value')
+                    ->label(__('Notes'))
+                    ->getValueUsing(function(FormattedColumn $column){
+                        return $column->getItem()->getMetaData('notes', true);
+                    }),
+                CreatedAtColumn::make(),
             ])
             ->addBulkActions([
                 DeleteBulkAction::make()->permission('invoice.destroy'),
@@ -82,7 +90,7 @@ class InvoiceTable extends TableAbstract
                     'member_id',
                     'created_at',
                     'status',
-                ]);
+                ])->with('metadata','member');
             });
     }
 }

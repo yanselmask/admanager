@@ -12,6 +12,7 @@ use Botble\Table\BulkChanges\CreatedAtBulkChange;
 use Botble\Table\BulkChanges\NameBulkChange;
 use Botble\Table\BulkChanges\StatusBulkChange;
 use Botble\Table\Columns\CheckboxColumn;
+use Botble\Table\Columns\Column;
 use Botble\Table\Columns\CreatedAtColumn;
 use Botble\Table\Columns\FormattedColumn;
 use Botble\Table\Columns\IdColumn;
@@ -34,27 +35,20 @@ class DomainTable extends TableAbstract
             ])
             ->addColumns([
                 IdColumn::make(),
+//                Column::make('member.first_name')
+//                    ->label(__('First Name'))
+//                    ->hidden(),
+//                Column::make('member.last_name')
+//                    ->label(__('Last Name'))
+//                    ->hidden(),
                 NameColumn::make()->route('domain.edit'),
                 NameColumn::make('url')->label(__('Url'))->route('domain.edit'),
                 NameColumn::make('network_code')->label(__('Network Code'))->route('domain.edit'),
                 FormattedColumn::make('member_id')
-                    ->title(__('Author'))
-                    ->width(150)
-                    ->orderable(false)
-                    ->searchable(false)
-                    ->getValueUsing(function (FormattedColumn $column) {
-                        return $column->getItem()?->member?->first_name . ' ' . $column->getItem()?->last_name;
-                    })
-                    ->renderUsing(function (FormattedColumn $column) {
-                        $url = $column->getItem()->author_url;
-
-                        if (! $url) {
-                            return null;
-                        }
-
-                        return Html::link($url, $column->getItem()->member_id, ['target' => '_blank']);
-                    })
-                    ->withEmptyState(),
+                    ->label(__('Member'))
+                    ->getValueUsing(function(FormattedColumn $column) {
+                        return optional($column->getItem()->member)->first_name . ' ' . optional($column->getItem()->member)->last_name;
+                    }),
                 YesNoColumn::make('is_subdomain')
                     ->label(__('Subdomain'))
                     ->route('domain.edit'),
