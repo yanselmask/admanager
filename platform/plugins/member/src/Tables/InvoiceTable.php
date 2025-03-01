@@ -33,11 +33,9 @@ class InvoiceTable extends TableAbstract
                 DeleteAction::make()->route('invoice.destroy'),
             ])
             ->addColumns([
-                IdColumn::make(),
                 Column::make('name')
                     ->label(__('Invoice Number'))
                     ->route('invoice.edit'),
-                DateColumn::make('invoice_date')->label(__('Invoice Date'))->route('invoice.edit'),
                 FormattedColumn::make('currency')
                     ->label(__('Invoice Currency'))
                     ->getValueUsing(function(FormattedColumn $column){
@@ -70,6 +68,8 @@ class InvoiceTable extends TableAbstract
                     ->getValueUsing(function(FormattedColumn $column){
                         return $column->getItem()->getMetaData('notes', true);
                     }),
+//                IdColumn::make(),
+//                DateColumn::make('invoice_date')->label(__('Invoice Date'))->route('invoice.edit'),
                 CreatedAtColumn::make(),
             ])
             ->addBulkActions([
