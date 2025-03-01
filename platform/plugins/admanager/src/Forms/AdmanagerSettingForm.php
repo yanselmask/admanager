@@ -129,6 +129,7 @@ class AdmanagerSettingForm extends SettingForm
                 MediaFileFieldOption::make()->label(__('Your Json'))
                     ->required()
                     ->value(setting('admanager_json'))
+                    ->helperText(__('Esta es la dirección local: :path', ['path' => setting('admanager_json') ? \Storage::path(setting('admanager_json')) : 'No tiene']))
             )
             ->add('percentage_default',
                 TextField::class,
