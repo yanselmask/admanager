@@ -122,7 +122,6 @@ class Admanager {
             dateRangeType: $this->dateRangeType,
             column: $this->column
         );
-
     }
 
 
@@ -294,7 +293,6 @@ class Admanager {
         };
     }
 
-
     public function getNetworksCode()
     {
         $networks = json_decode(setting('admanager_networks'), true);
@@ -334,5 +332,4 @@ class Admanager {
 
         return $formatted;
     }
-
 }

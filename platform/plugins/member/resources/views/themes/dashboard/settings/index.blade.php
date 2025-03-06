@@ -59,6 +59,19 @@
 @include('plugins/custom-field::_script-templates.render-custom-fields')
 
 @push('scripts')
+    <script>
+        let refByInput = document.querySelector('[name=ref_by]');
+        if(refByInput)
+        {
+            refByInput.addEventListener('click',() => {
+                alert('Enlace copiado.')
+                refByInput.select();
+                refByInput.setSelectionRange(0, 99999);
+                /*For mobile devices*/
+                document.execCommand("copy");
+            })
+        }
+    </script>
     {!! JsValidator::formRequest(Botble\Member\Http\Requests\SettingRequest::class) !!}
     {!! JsValidator::formRequest(Botble\Member\Http\Requests\UpdatePasswordRequest::class) !!}
 @endpush

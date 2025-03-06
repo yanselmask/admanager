@@ -23,19 +23,17 @@ Artisan::command('generate:report', function () {
     $manageNetworks = new \Botble\Admanager\Services\Admanager();
     foreach ($manageNetworks->getNetworksCodeAndName() as $key => $value)
     {
+        $manager = new Admanager();
+        $manager->setNetworkCode($key)
+                ->setNetworkName($value);
         foreach (json_decode(setting('earning_member')) as $date)
         {
-                $manager = new Admanager();
-                $manager->setNetworkCode($key)
-                        ->setNetworkName($value)
-                        ->setDateCsv($date)
-                        ->setDateRangeType(strtoupper($date))
-                        ->setColumn($date)
-                        ->run();
+          $manager->setDateCsv($date)
+                  ->setDateRangeType(strtoupper($date))
+                  ->setColumn($date)
+                  ->run();
         }
-
     }
-    $this->info('Generated report successfully!');
 });
 
 Artisan::command('generate:report:custom {date}', function () {
@@ -46,11 +44,11 @@ Artisan::command('generate:report:custom {date}', function () {
 
         $manager = new Admanager();
         $manager->setNetworkCode($key)
-            ->setNetworkName($value)
-            ->setDateCsv(strtolower($date))
-            ->setDateRangeType(strtoupper($date))
-            ->setColumn(strtolower($date))
-            ->run();
+                ->setNetworkName($value)
+                ->setDateCsv(strtolower($date))
+                ->setDateRangeType(strtoupper($date))
+                ->setColumn(strtolower($date))
+                ->run();
     }
 });
 

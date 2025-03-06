@@ -228,7 +228,7 @@ class PublicController extends BaseController
 
     public function postCustomFields(Request $request)
     {
-        $validated = $request->validate([]);
+        $request->request->remove('ref_by');
         CUstomForm::createFromModel(auth('member')->user())
             ->saving(function (CUstomForm $form) use ($request): void {
                 $model = $form->getModel();

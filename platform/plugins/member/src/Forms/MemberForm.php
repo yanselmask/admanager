@@ -67,8 +67,7 @@ class MemberForm extends FormAbstract
                 TextField::class,
                 TextFieldOption::make()
                     ->value(route('public.member.register') . '?ref_by=' . auth('member')->user()?->username)
-                    ->helperText(route('public.member.register') . '?ref_by=' . auth('member')->user()?->username)
-                    ->disabled()
+                    ->attributes(['readonly' => 'readonly'])
             )
             ->add(
                 'phone',
