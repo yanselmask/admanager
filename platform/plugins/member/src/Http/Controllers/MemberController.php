@@ -79,6 +79,7 @@ class MemberController extends BaseController
 
     public function update(Member $member, MemberEditRequest $request)
     {
+        $request->request->remove('ref_by');
         MemberForm::createFromModel($member)
             ->saving(function (MemberForm $form) use ($request): void {
                 $member = $form->getModel();
