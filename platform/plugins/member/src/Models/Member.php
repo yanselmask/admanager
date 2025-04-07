@@ -54,6 +54,7 @@ class Member extends BaseModel implements
         'phone',
         'description',
         'gender',
+        'status'
     ];
 
     protected $hidden = [

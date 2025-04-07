@@ -250,6 +250,18 @@ class MemberServiceProvider extends ServiceProvider
                         ];
                     });
             }
+
+            if (defined('CUSTOM_FIELD_MODULE_SCREEN_NAME')) {
+                \Botble\CustomField\Facades\CustomField::registerModule(Invoice::class)
+                    ->registerRule('basic', __('Member'), Member::class, function () {
+                        return Invoice::query()->pluck('name', 'id')->all();
+                    })
+                    ->expandRule('other', 'Model', 'model_name', function () {
+                        return [
+                            Invoice::class => __('Invoice'),
+                        ];
+                    });
+            }
         });
 
         add_filter('social_login_before_saving_account', function ($data, $oAuth, $providerData) {

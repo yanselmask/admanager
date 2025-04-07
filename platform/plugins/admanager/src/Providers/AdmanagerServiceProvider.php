@@ -8,6 +8,8 @@ use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Base\Facades\DashboardMenu;
 use Botble\Admanager\Models\Admanager;
+use Botble\Member\Models\Invoice;
+use Botble\Member\Models\Member;
 use Botble\Setting\PanelSections\SettingOthersPanelSection;
 
 class AdmanagerServiceProvider extends ServiceProvider
@@ -28,6 +30,7 @@ class AdmanagerServiceProvider extends ServiceProvider
                     'name',
                 ]);
             }
+
 
         PanelSectionManager::default()->beforeRendering(function (): void {
             PanelSectionManager::registerItem(
