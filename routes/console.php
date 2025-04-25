@@ -80,7 +80,7 @@ Artisan::command('generate:invoice',function(){
                 {
                     $comRef = (int) ($ref->getMetaData('commissions', true) ?? setting('referral_commissions', true) );
                     $com = ( ($comRef * $invoice->amount) / 100);
-                    $newBalance = $ref->getMetaData('balances', true) + $com;
+                    $newBalance = (int) $ref->getMetaData('balances', 0) + $com;
 
                     $invoice2 = new \Botble\Member\Models\Invoice();
                     $invoice2->name = generate_invoice();
