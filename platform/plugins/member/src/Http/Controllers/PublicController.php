@@ -3,13 +3,10 @@
 namespace Botble\Member\Http\Controllers;
 
 use Botble\ACL\Models\User;
-use Botble\Admanager\Services\Admanager;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Blog\Models\Post;
-use Botble\CustomField\Facades\CustomField;
-use Botble\CustomField\Models\FieldGroup;
 use Botble\Domain\Models\Domain;
 use Botble\Media\Chunks\Exceptions\UploadMissingFileException;
 use Botble\Media\Chunks\Handler\DropZoneUploadHandler;
@@ -28,8 +25,6 @@ use Botble\Member\Http\Resources\ActivityLogResource;
 use Botble\Member\Models\Invoice;
 use Botble\Member\Models\Member;
 use Botble\Member\Models\MemberActivityLog;
-use Botble\Member\Tables\InvoiceFrontTable;
-use Botble\Member\Tables\InvoiceTable;
 use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\SeoHelper\SeoOpenGraph;
 use Botble\Slug\Facades\SlugHelper;
@@ -63,7 +58,7 @@ class PublicController extends BaseController
 
         SeoHelper::setTitle($author->name)->setDescription($author->description);
 
-        $meta = new SeoOpenGraph();
+        $meta = new SeoOpenGraph;
         if ($author->avatar) {
             $meta->setImage(RvMedia::getImageUrl($author->avatar));
         }
@@ -97,44 +92,128 @@ class PublicController extends BaseController
         $domain = Domain::where('member_id', $user->id)->first();
 
         $optionsGraf = [];
+        $optionsAlt = [];
+        $cards = [];
 
-        if(json_decode(setting('earning_member')))
-        {
+        if (json_decode(setting('earning_member'))) {
             array_push($optionsGraf, 'ganancias');
+            $optionsAlt['earning_member'] = 'Ganancias';
         }
-        if(json_decode(setting('impressions_member')))
-        {
-            array_push($optionsGraf, 'impresiones');
-        }
-        if(json_decode(setting('clicks_member')))
-        {
+        if (json_decode(setting('clicks_member'))) {
             array_push($optionsGraf, 'clicks');
+            $optionsAlt['clicks_member'] = 'Clicks';
         }
-        if(json_decode(setting('ctrs_member')))
-        {
+        if (json_decode(setting('impressions_member'))) {
+            array_push($optionsGraf, 'impresiones');
+            $optionsAlt['impressions_member'] = 'Impresioness';
+        }
+        if (json_decode(setting('ctrs_member'))) {
             array_push($optionsGraf, 'ctrs');
+            $optionsAlt['ctrs_member'] = 'CTR';
         }
-        if(json_decode(setting('ecpms_member')))
-        {
+        if (json_decode(setting('ecpms_member'))) {
             array_push($optionsGraf, 'ecpm');
+            $optionsAlt['ecpms_member'] = 'eCPM';
         }
 
+        $period = request()->query('period', 'today');
+        $urlRequested = request()->input('domain') == 'any' ? '' : request()->input('domain');
+        $cards = [
+            'earning' => 0,
+            'earning_net' => 0,
+            'clicks' => 0,
+            'impressions' => 0,
+            'ctrs' => 0,
+            'ecpms' => 0,
+            'cpc' => 0,
+            'commissions_network' => 0,
+            'commissions_network_formatted' => false,
+            'commissions_platform' => 0,
+            'commissions_platform_formatted' => false,
+        ];
+        $domain = Domain::where('url', $urlRequested)->where('member_id', $user->id)->first();
+        $domains = $domain ? collect([$domain]) : Domain::where('member_id', $user->id)->get();
 
-        if($dname = request()->input('domain'))
-        {
-            $domain = Domain::where('url', $dname)->where('member_id', $user->id)->first();
-
-            if(!$domain)
-            {
-                $domain = Domain::where('member_id', $user->id)->first();
+        foreach ($domains as $d) {
+            $cards['earning'] += $this->clearDollarSign($d->getEarning($period));
+            if (isset($d->earnings[$period])) {
+                $cards['earning_net'] += $this->clearDollarSign($d->earnings[$period]) / 1000000;
             }
+            $cards['clicks'] += $this->convertToNumber($d->getClicks($period));
+            $cards['impressions'] += $this->convertToNumber($d->getImpressions($period));
+            $cards['ecpms'] += bcdiv($this->clearDollarSign($d->getEcpms($period)), count($domains), 2);
+            $cards['ctrs'] += $d->getCtrs($period);
+            $cards['cpc'] += $cards['earning_net'] > 0 && $cards['clicks'] > 0 ? $cards['earning_net'] / $cards['clicks'] : 0;
+
+            $cards['commissions_network'] += $this->clearDollarSign($d->getEarningInverse($period, $d->commissions_network));
+            $cards['commissions_platform'] += $this->clearDollarSign($d->getEarningInverse($period, ($d->commissions - $d->commissions_network)));
+        }
+
+        if ($cards['ctrs'] > 0) {
+            if ($urlRequested) {
+                $cards['ctrs'] = number_format($cards['ctrs'] * 100, 2, '.', '');
+            } else {
+                $cards['ctrs'] = number_format(($cards['ctrs'] * 100) / count($domains), 2, '.', '');
+            }
+            $cards['ctrs'] = $cards['ctrs'].'%';
+        }
+
+        if ($cards['cpc'] > 0) {
+            if ($urlRequested) {
+                $cards['cpc'] = number_format($cards['cpc'], 2);
+            } else {
+                $cards['cpc'] = number_format($cards['cpc'] / count($domains), 2);
+            }
+        }
+
+        if ($cards['commissions_network'] > 0) {
+            $cards['commissions_network_formatted'] = __('Ganancias de la network: :earning', [
+                'earning' => $cards['commissions_network'],
+            ]);
+
+            $cards['commissions_platform_formatted'] = __('Ganancias de la plataforma: :earning', [
+                'earning' => $cards['commissions_platform'],
+            ]);
         }
 
         $this->pageTitle(__('Estadisticas'));
 
         Assets::addScriptsDirectly('vendor/core/core/base/libraries/ckeditor/ckeditor.js');
 
-        return view('plugins/member::themes.dashboard.index', compact('user','domain','optionsGraf'));
+        return view(Theme::getThemeNamespace('views.member.dashboard.index'), compact('user', 'domain', 'optionsGraf', 'optionsAlt', 'cards'));
+    }
+
+    public function convertToNumber($str)
+    {
+        // Elimina espacios
+        $str = trim($str);
+
+        // Si termina en K, M o B
+        if (stripos($str, 'K') !== false) {
+            return floatval($str) * 1000;
+        } elseif (stripos($str, 'M') !== false) {
+            return floatval($str) * 1000000;
+        } elseif (stripos($str, 'B') !== false) {
+            return floatval($str) * 1000000000;
+        } else {
+            return floatval($str);
+        }
+    }
+
+    public function clearDollarSign(?string $str = null): float
+    {
+        if (is_null($str)) {
+            return 0;
+        }
+        // Elimina cualquier símbolo de $ y espacios en blanco
+        $clean = str_replace('$', '', $str);
+        $clean = trim($clean);
+
+        // También podrías eliminar comas si recibes valores como $1,234.56
+        $clean = str_replace(',', '', $clean);
+
+        // Convierte a float
+        return (float) $clean;
     }
 
     public function getKycForm()
@@ -145,13 +224,12 @@ class PublicController extends BaseController
 
         $user = auth('member')->user();
 
-        return view('plugins/member::themes.dashboard.kyc', compact('form', 'user'));
+        return view(Theme::getThemeNamespace('views.member.dashboard.kyc'), compact('form', 'user'));
     }
 
     public function postKyc(KycRequest $request)
     {
         $validated = $this->processRequestDataKyc($request);
-
 
         KycFrontForm::createFromModel(auth('member')->user())
             ->saving(function (KycFrontForm $form) use ($request): void {
@@ -169,12 +247,11 @@ class PublicController extends BaseController
                         'document_front' => $request->document_front,
                         'document_back' => $request->document_back,
                         'selfie' => $request->selfie,
-                        'status' => 'pending'
+                        'status' => 'pending',
                     ]
                 );
 
             });
-
 
         MemberActivityLog::query()->create([
             'action' => 'kyc_send',
@@ -202,8 +279,8 @@ class PublicController extends BaseController
         $customForm = CustomForm::createFromModel($user);
 
         return view(
-            'plugins/member::themes.dashboard.settings.index',
-            compact('user', 'profileForm', 'changePasswordForm','customForm')
+            Theme::getThemeNamespace('views.member.dashboard.settings.index'),
+            compact('user', 'profileForm', 'changePasswordForm', 'customForm')
         );
     }
 
@@ -345,7 +422,7 @@ class PublicController extends BaseController
             $receiver = new FileReceiver('file', $request, DropZoneUploadHandler::class);
             // Check if the upload is success, throw exception or return response you need
             if ($receiver->isUploaded() === false) {
-                throw new UploadMissingFileException();
+                throw new UploadMissingFileException;
             }
             // Receive the file
             $save = $receiver->receive();
@@ -394,7 +471,7 @@ class PublicController extends BaseController
 
         $referrals = $user->referrals()->paginate();
 
-        return view('plugins/member::themes.dashboard.referrals', compact('user','referrals'));
+        return view(Theme::getThemeNamespace('views.member.dashboard.referrals'), compact('user', 'referrals'));
     }
 
     protected function processRequestDataKyc(Request $request): Request
@@ -434,7 +511,6 @@ class PublicController extends BaseController
         $user = auth('member')->user();
         $invoices = Invoice::query()->where('member_id', auth('member')->id())->latest()->paginate();
 
-        return view('plugins/member::themes.dashboard.invoices', compact('user', 'invoices'));
+        return view(Theme::getThemeNamespace('views.member.dashboard.invoices'), compact('user', 'invoices'));
     }
-
 }

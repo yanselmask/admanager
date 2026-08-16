@@ -1,0 +1,10 @@
+{
+    "id": "botble/moreno",
+    "name": "Moreno",
+    "namespace": "Theme\\Moreno\\",
+    "author": null,
+    "url": null,
+    "version": "1.0.0",
+    "description": "PAGO Social theme with light and dark brand modes",
+    "required_plugins": []
+}

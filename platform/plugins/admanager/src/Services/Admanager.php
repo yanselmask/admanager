@@ -2,22 +2,21 @@
 
 namespace Botble\Admanager\Services;
 
-
 use Botble\Domain\Models\Domain;
 use Google\AdsApi\AdManager\AdManagerSession;
 use Google\AdsApi\AdManager\AdManagerSessionBuilder;
-use Google\AdsApi\AdManager\Util\v202411\ReportDownloader;
-use Google\AdsApi\AdManager\v202411\Column;
-use Google\AdsApi\AdManager\v202411\Dimension;
-use Google\AdsApi\AdManager\v202411\ExportFormat;
-use Google\AdsApi\AdManager\v202411\ReportJob;
-use Google\AdsApi\AdManager\v202411\ReportQuery;
-use Google\AdsApi\AdManager\v202411\ReportQueryAdUnitView;
-use Google\AdsApi\AdManager\v202411\ServiceFactory;
+use Google\AdsApi\AdManager\Util\v202511\ReportDownloader;
+use Google\AdsApi\AdManager\v202511\Column;
+use Google\AdsApi\AdManager\v202511\Dimension;
+use Google\AdsApi\AdManager\v202511\ExportFormat;
+use Google\AdsApi\AdManager\v202511\ReportJob;
+use Google\AdsApi\AdManager\v202511\ReportQuery;
+use Google\AdsApi\AdManager\v202511\ReportQueryAdUnitView;
+use Google\AdsApi\AdManager\v202511\ServiceFactory;
 use Google\AdsApi\Common\OAuth2TokenBuilder;
 
-class Admanager {
-
+class Admanager
+{
     protected string $networkCode;
 
     protected string $networkName;
@@ -32,9 +31,7 @@ class Admanager {
 
     protected $column;
 
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     public function setNetworkCode($networkCode)
     {
@@ -42,7 +39,7 @@ class Admanager {
 
         $adsapi = storage_path('adsapi_php.ini');
         $contenido = file_get_contents($adsapi);
-        $nuevaRuta = 'networkCode = "' . $networkCode  .'"';
+        $nuevaRuta = 'networkCode = "'.$networkCode.'"';
         $contenidoModificado = preg_replace(
             '/networkCode\s*=\s*".*?"/',
             $nuevaRuta,
@@ -60,7 +57,7 @@ class Admanager {
 
         $adsapi = storage_path('adsapi_php.ini');
         $contenido = file_get_contents($adsapi);
-        $nuevaRuta = 'applicationName = "' . $networkName  .'"';
+        $nuevaRuta = 'applicationName = "'.$networkName.'"';
         $contenidoModificado = preg_replace(
             '/applicationName\s*=\s*".*?"/',
             $nuevaRuta,
@@ -75,7 +72,7 @@ class Admanager {
     public function setSession(AdManagerSession $session)
     {
 
-        (new AdManagerSessionBuilder())
+        (new AdManagerSessionBuilder)
             ->fromFile(storage_path('adsapi_php.ini'))
             ->withOAuth2Credential($this->oAuth2Credential)
             ->build();
@@ -106,24 +103,23 @@ class Admanager {
 
     public function run()
     {
-        $this->oAuth2Credential = (new OAuth2TokenBuilder())
+        $this->oAuth2Credential = (new OAuth2TokenBuilder)
             ->fromFile(storage_path('adsapi_php.ini'))
             ->build();
 
-        $this->session = (new AdManagerSessionBuilder())
+        $this->session = (new AdManagerSessionBuilder)
             ->fromFile(storage_path('adsapi_php.ini'))
             ->withOAuth2Credential($this->oAuth2Credential)
             ->build();
 
         self::runReport(
-            new ServiceFactory(),
+            new ServiceFactory,
             $this->session,
             dateCsv: $this->dateCsv,
             dateRangeType: $this->dateRangeType,
             column: $this->column
         );
     }
-
 
     public static function runReport(
         ServiceFactory $serviceFactory,
@@ -134,10 +130,10 @@ class Admanager {
     ) {
         $reportService = $serviceFactory->createReportService($session);
         // Create report query.
-        $reportQuery = new ReportQuery();
+        $reportQuery = new ReportQuery;
         $reportQuery->setDimensions(
             [
-                Dimension::SITE_NAME
+                Dimension::SITE_NAME,
             ]
         );
         $reportQuery->setColumns(
@@ -147,7 +143,7 @@ class Admanager {
                 Column::AD_EXCHANGE_LINE_ITEM_LEVEL_CTR,
                 Column::AD_EXCHANGE_LINE_ITEM_LEVEL_REVENUE,
                 Column::AD_EXCHANGE_LINE_ITEM_LEVEL_AVERAGE_ECPM,
-                Column::AD_EXCHANGE_LINE_ITEM_LEVEL_PERCENT_IMPRESSIONS
+                Column::AD_EXCHANGE_LINE_ITEM_LEVEL_PERCENT_IMPRESSIONS,
             ]
         );
         // Set the ad unit view to hierarchical.
@@ -155,18 +151,15 @@ class Admanager {
         // Set the start and end dates or choose a dynamic date range type.
         $dateEvaluated = self::evaluateDate($dateRangeType);
 
-
-        if(is_array($dateEvaluated))
-        {
+        if (is_array($dateEvaluated)) {
             $reportQuery->setStartDate($dateEvaluated[0]);
             $reportQuery->setEndDate($dateEvaluated[1]);
-        }else{
+        } else {
             $reportQuery->setDateRangeType($dateRangeType);
         }
 
-
         // Create report job and start it.
-        $reportJob = new ReportJob();
+        $reportJob = new ReportJob;
         $reportJob->setReportQuery($reportQuery);
         $reportJob = $reportService->runReportJob($reportJob);
         // Create report downloader to poll report's status and download when
@@ -184,12 +177,12 @@ class Admanager {
 
             $reportDownloader->downloadReport(ExportFormat::CSV_DUMP, $gzFile);
 
-            $csvFile = storage_path($dateCsv . '.csv');
+            $csvFile = storage_path($dateCsv.'.csv');
 
             $fp = gzopen($gzFile, 'rb');
             $csvFp = fopen($csvFile, 'wb');
 
-            while (!gzeof($fp)) {
+            while (! gzeof($fp)) {
                 fwrite($csvFp, gzread($fp, 4096));
             }
 
@@ -206,22 +199,21 @@ class Admanager {
         $dateCsv,
         $dateRangeType,
         $column
-    )
-    {
+    ) {
         // Generate a refreshable OAuth2 credential for authentication.
-        $oAuth2Credential = (new OAuth2TokenBuilder())
+        $oAuth2Credential = (new OAuth2TokenBuilder)
             ->fromFile(storage_path('adsapi_php.ini'))
             ->build();
 
         // Construct an API session configured from an `adsapi_php.ini` file
         // and the OAuth2 credentials above.
-        $session = (new AdManagerSessionBuilder())
+        $session = (new AdManagerSessionBuilder)
             ->fromFile(storage_path('adsapi_php.ini'))
             ->withOAuth2Credential($oAuth2Credential)
             ->build();
 
         self::runReport(
-            new ServiceFactory(),
+            new ServiceFactory,
             $session,
             dateCsv: $dateCsv,
             dateRangeType: $dateRangeType,
@@ -229,16 +221,16 @@ class Admanager {
         );
     }
 
-    public static function  updateEarning($csvFile, $column)
+    public static function updateEarning($csvFile, $column)
     {
-        if (!file_exists($csvFile)) {
+        if (! file_exists($csvFile)) {
             throw new \Exception("El archivo CSV no existe: $csvFile");
         }
 
-        if (($handle = fopen($csvFile, "r")) !== FALSE) {
-            $headers = fgetcsv($handle, 1000, ",");
+        if (($handle = fopen($csvFile, 'r')) !== false) {
+            $headers = fgetcsv($handle, 1000, ',');
 
-            while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+            while (($data = fgetcsv($handle, 1000, ',')) !== false) {
                 $domainName = trim($data[0]);
                 $valueImpressions = floatval($data[1]);
                 $valueClicks = floatval($data[2]);
@@ -300,8 +292,7 @@ class Admanager {
         $formatted = collect($networks)
             ->flatten(1)
             ->map(function ($network) {
-                if($network['key'] == 'code')
-                {
+                if ($network['key'] == 'code') {
                     return $network['value'];
                 }
             })
@@ -326,6 +317,7 @@ class Admanager {
                         $pair['name'] = $item['value'];
                     }
                 }
+
                 return isset($pair['code'], $pair['name']) ? [$pair['code'] => $pair['name']] : [];
             })
             ->toArray();

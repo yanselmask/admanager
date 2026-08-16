@@ -32,12 +32,20 @@
                     {!! $profileForm !!}
                 </x-core::tab.pane>
                 <x-core::tab.pane id="avatar-tab">
-                    <x-core::crop-image
-                        :label="trans('plugins/member::dashboard.profile-picture')"
-                        name="avatar_file"
-                        :value="auth('member')->user()->avatar_url"
-                        :action="route('public.member.avatar')"
-                    />
+                    @if($img = auth('member')->user()->avatar_url)
+                    <div class="avatar avatar-4xl">
+                        <img class="rounded-circle" src="{{$img}}" alt="" />
+                    </div>
+                    @endif
+                    <div class="container">
+                        <form action="{{route('public.member.avatar')}}" method="POST" enctype="multipart/form-data">
+                            @csrf
+                            <div class="mb-3"><label class="form-label" for="customFile">Foto de perfil</label><input class="form-control" id="customFile" accept="image/*" name="avatar_file" type="file" /></div>
+                            <div class="d-flex">
+                                <button class="btn btn-primary mt-3">Cambiar imagen</button>
+                            </div>
+                        </form>
+                    </div>
                 </x-core::tab.pane>
                 <x-core::tab.pane id="change-password-tab">
                     {!! $changePasswordForm !!}

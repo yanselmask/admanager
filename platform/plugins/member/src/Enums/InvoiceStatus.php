@@ -10,7 +10,6 @@ enum InvoiceStatus: string
 
     case PARTIALLY_PAID = 'partially_paid';
 
-
     public static function choices(): array
     {
         return [
@@ -26,13 +25,13 @@ enum InvoiceStatus: string
         return ['pending', 'paid', 'unpaid', 'partially_paid'];
     }
 
-    public static function badge($value) {
-        return match ($value){
-          'pending' => '<div class="badge bg-warning text-warning-fg">' . __('Pending') . '</div>',
-          'paid' => '<div class="badge bg-success text-success-fg">' . __('Paid') . '</div>',
-          'unpaid' => '<div class="badge bg-danger text-danger-fg">' . __('Unpaid') . '</div>',
-          'partially_paid' => '<div class="badge bg-secondary text-secondary-fg">' . __('Partially paid') . '</div>',
+    public static function badge($value)
+    {
+        return match ($value) {
+            'pending' => '<div class="badge bg-danger text-warning-fg">'.__('Pending').'</div>',
+            'paid' => '<div class="badge bg-primary text-success-fg">'.__('Paid').'</div>',
+            'unpaid' => '<div class="badge bg-danger text-danger-fg">'.__('Unpaid').'</div>',
+            'partially_paid' => '<div class="badge bg-secondary text-secondary-fg">'.__('Partially paid').'</div>',
         };
     }
 }
-

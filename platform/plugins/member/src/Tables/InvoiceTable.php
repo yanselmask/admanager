@@ -10,14 +10,12 @@ use Botble\Table\Actions\EditAction;
 use Botble\Table\BulkActions\DeleteBulkAction;
 use Botble\Table\BulkChanges\CreatedAtBulkChange;
 use Botble\Table\BulkChanges\NameBulkChange;
-use Botble\Table\BulkChanges\StatusBulkChange;
+use Botble\Table\BulkChanges\SelectBulkChange;
 use Botble\Table\Columns\Column;
 use Botble\Table\Columns\CreatedAtColumn;
 use Botble\Table\Columns\DateColumn;
 use Botble\Table\Columns\FormattedColumn;
 use Botble\Table\Columns\IdColumn;
-use Botble\Table\Columns\NameColumn;
-use Botble\Table\Columns\StatusColumn;
 use Botble\Table\HeaderActions\CreateHeaderAction;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -38,15 +36,14 @@ class InvoiceTable extends TableAbstract
                     ->route('invoice.edit'),
                 FormattedColumn::make('currency')
                     ->label(__('Invoice Currency'))
-                    ->getValueUsing(function(FormattedColumn $column){
+                    ->getValueUsing(function (FormattedColumn $column) {
                         return get_currency_code($column->getItem()->currency)['code'];
                     }),
                 FormattedColumn::make('amount')
                     ->label(__('Invoice Amount'))
-                    ->getValueUsing(function(FormattedColumn $column){
+                    ->getValueUsing(function (FormattedColumn $column) {
                         return str(get_currency_code($column->getItem()->currency)['symbol'])->append(number_format($column->getItem()->amount, 2));
-                    })
-                ,
+                    }),
                 Column::make('member.first_name')
                     ->label(__('First Name'))
                     ->hidden(),
@@ -55,21 +52,21 @@ class InvoiceTable extends TableAbstract
                     ->hidden(),
                 FormattedColumn::make('member_id')
                     ->label(__('Member'))
-                    ->getValueUsing(function(FormattedColumn $column) {
-                        return optional($column->getItem()->member)->first_name . ' ' . optional($column->getItem()->member)->last_name;
+                    ->getValueUsing(function (FormattedColumn $column) {
+                        return optional($column->getItem()->member)->first_name.' '.optional($column->getItem()->member)->last_name;
                     }),
                 FormattedColumn::make('status')
                     ->label(__('Status'))
-                    ->getValueUsing(function(FormattedColumn $column){
+                    ->getValueUsing(function (FormattedColumn $column) {
                         return InvoiceStatus::badge($column->getItem()->status);
                     }),
                 FormattedColumn::make('metadata.meta_value')
                     ->label(__('Notes'))
-                    ->getValueUsing(function(FormattedColumn $column){
+                    ->getValueUsing(function (FormattedColumn $column) {
                         return $column->getItem()->getMetaData('notes', true);
                     }),
-//                IdColumn::make(),
-//                DateColumn::make('invoice_date')->label(__('Invoice Date'))->route('invoice.edit'),
+                //                IdColumn::make(),
+                //                DateColumn::make('invoice_date')->label(__('Invoice Date'))->route('invoice.edit'),
                 CreatedAtColumn::make(),
             ])
             ->addBulkActions([
@@ -77,7 +74,11 @@ class InvoiceTable extends TableAbstract
             ])
             ->addBulkChanges([
                 NameBulkChange::make(),
-                StatusBulkChange::make(),
+                SelectBulkChange::make()
+                    ->name('status')
+                    ->title(trans('core/base::tables.status'))
+                    ->type('customSelect')
+                    ->choices(InvoiceStatus::choices()),
                 CreatedAtBulkChange::make(),
             ])
             ->queryUsing(function (Builder $query) {
@@ -90,7 +91,7 @@ class InvoiceTable extends TableAbstract
                     'member_id',
                     'created_at',
                     'status',
-                ])->with('metadata','member');
+                ])->with('metadata', 'member');
             });
     }
 }

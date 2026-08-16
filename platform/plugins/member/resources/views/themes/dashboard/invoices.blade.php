@@ -1,33 +1,41 @@
 @extends('plugins/member::themes.dashboard.layouts.master')
 @section('content')
-    @if(count($invoices))
-    <table class="table">
-        <thead>
-        <tr>
-            <th scope="col">#</th>
-            <th scope="col">{{__('Invoice Number')}}</th>
-            <th scope="col">{{__('Invoice Date')}}</th>
-            <th scope="col">{{__('Invoice Amount')}}</th>
-            <th scope="col">{{__('Notes')}}</th>
-            <th scope="col">{{__('Status')}}</th>
-        </tr>
-        </thead>
-        <tbody>
-        @foreach($invoices as $invoice)
-        <tr>
-            <th scope="row">{{$invoice->id}}</th>
-            <td>{{$invoice->name}}</td>
-            <td>{{$invoice->invoice_date?->format('M d, Y')}}</td>
-            <td>{{str(isset(get_currency_code($invoice->currency)['symbol']) ? get_currency_code($invoice->currency)['symbol'] : 'USD`')->append(number_format($invoice->amount, 2))}}</td>
-            <td>{{$invoice->getMetaData('notes', true)}}</td>
-            <td>{!! \Botble\Member\Enums\InvoiceStatus::badge($invoice->status) !!}</td>
-        </tr>
-        @endforeach
+        <div class="row g-0 h-100">
+            <div class="col-12 mb-3">
+                <div class="card bg-body-tertiary dark__bg-opacity-50 shadow-none">
+                    <div class="d-flex align-items-center z-1 p-0">
+                        <div class="">
+                            <h4 class="mb-0 text-info fw-bold text-center text-md-start" style="font-size: 2.5rem">Historial de pagos</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @if(count($invoices))
+            <table class="table">
+                <thead>
+                <tr>
+{{--                    <th scope="col">#</th>--}}
+                    <th scope="col">{{__('Mes')}}</th>
+                    <th scope="col">{{__('Sitio')}}</th>
+                    <th scope="col">{{__('Ingresos')}}</th>
+                    <th scope="col">{{__('Estado')}}</th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach($invoices as $invoice)
+                    <tr>
+                        <td>{{$invoice->invoice_date?->format('M')}}</td>
+                        <td>{{$invoice->getMetaData('notes', true)}}</td>
+                        <td>{{str(isset(get_currency_code($invoice->currency)['symbol']) ? get_currency_code($invoice->currency)['symbol'] : 'USD`')->append(number_format($invoice->amount, 2))}}</td>
+                        <td>{!! \Botble\Member\Enums\InvoiceStatus::badge($invoice->status) !!}</td>
+                    </tr>
+                @endforeach
 
-        </tbody>
-    </table>
-        {{$invoices->links()}}
-    @else
-        <h3>{{__('Aún no tienes facturas generadas')}}</h3>
-    @endif
+                </tbody>
+            </table>
+            {{$invoices->links()}}
+        @else
+            <h3>{{__('Aún no tienes facturas generadas')}}</h3>
+        @endif
 @endsection

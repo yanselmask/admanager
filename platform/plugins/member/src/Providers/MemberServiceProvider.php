@@ -86,11 +86,11 @@ class MemberServiceProvider extends ServiceProvider
         $router->aliasMiddleware('member.kyc', RedirectIfKyc::class);
 
         $this->app->bind(MemberInterface::class, function () {
-            return new MemberRepository(new Member());
+            return new MemberRepository(new Member);
         });
 
         $this->app->bind(MemberActivityLogInterface::class, function () {
-            return new MemberActivityLogRepository(new MemberActivityLog());
+            return new MemberActivityLogRepository(new MemberActivityLog);
         });
     }
 
@@ -174,9 +174,9 @@ class MemberServiceProvider extends ServiceProvider
                         ->priority(40)
                         ->name('Soporte')
                         ->when(setting('support_number') && setting('support_message'))
-                        ->url(fn () => "https://api.whatsapp.com/send?phone=" . rawurlencode(setting('support_number')) .
-                               "&text=" . rawurlencode(setting('support_message'))
-                           )
+                        ->url(fn () => 'https://api.whatsapp.com/send?phone='.rawurlencode(setting('support_number')).
+                               '&text='.rawurlencode(setting('support_message'))
+                        )
                         ->icon('ti ti-brand-whatsapp')
                 )
                 ->registerItem(
@@ -186,6 +186,14 @@ class MemberServiceProvider extends ServiceProvider
                         ->name('Configuración')
                         ->url(fn () => route('public.member.settings'))
                         ->icon('ti ti-settings')
+                )
+                ->registerItem(
+                    DashboardMenuItem::make()
+                        ->id('cms-member-homepage')
+                        ->priority(50)
+                        ->name('Pagina de inicio')
+                        ->url(fn () => '/')
+                        ->icon('ti ti-world')
                 );
         });
 
@@ -228,8 +236,7 @@ class MemberServiceProvider extends ServiceProvider
                 ]);
             }
 
-            if (defined('LANGUAGE_ADVANCED_MODULE_SCREEN_NAME'))
-            {
+            if (defined('LANGUAGE_ADVANCED_MODULE_SCREEN_NAME')) {
                 \Botble\LanguageAdvanced\Supports\LanguageAdvancedManager::registerModule(\Botble\Member\Models\Kyc::class, [
                     'name',
                 ]);
@@ -299,9 +306,9 @@ class MemberServiceProvider extends ServiceProvider
                     $model->getKey() &&
                     LanguageAdvancedManager::isSupported($model)
                 ) {
-                    $refLang = '?ref_lang=' . $adminLocale;
+                    $refLang = '?ref_lang='.$adminLocale;
 
-                    $form->setFormOption('url', route('public.member.language-advanced.save', $model->getKey()) . $refLang);
+                    $form->setFormOption('url', route('public.member.language-advanced.save', $model->getKey()).$refLang);
                 }
             }
 
@@ -382,7 +389,7 @@ class MemberServiceProvider extends ServiceProvider
 
         add_filter('social_login_before_creating_account', function ($data) {
             if (! setting('member_enabled_registration', true)) {
-                return (new BaseHttpResponse())
+                return (new BaseHttpResponse)
                     ->setError()
                     ->setMessage(trans('auth.failed'));
             }
