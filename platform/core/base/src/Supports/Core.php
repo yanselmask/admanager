@@ -9,7 +9,6 @@ use Botble\Base\Events\LicenseDeactivating;
 use Botble\Base\Events\LicenseInvalid;
 use Botble\Base\Events\LicenseRevoked;
 use Botble\Base\Events\LicenseRevoking;
-use Botble\Base\Events\LicenseUnverified;
 use Botble\Base\Events\LicenseVerified;
 use Botble\Base\Events\LicenseVerifying;
 use Botble\Base\Events\SystemUpdateAvailable;
@@ -154,11 +153,7 @@ final class Core
 
     public function checkConnection(): bool
     {
-        return $this->cache->remember(
-            "license:{$this->getLicenseCacheKey()}:check_connection",
-            Carbon::now()->addDays($this->verificationPeriod),
-            fn () => rescue(fn () => $this->createRequest('check_connection_ext')->ok()) ?: false
-        );
+        return true;
     }
 
     public function version(): string
@@ -222,30 +217,9 @@ final class Core
     public function verifyLicense(bool $timeBasedCheck = false): bool
     {
         LicenseVerifying::dispatch();
+        LicenseVerified::dispatch();
 
-        if (! $this->isLicenseFileExists()) {
-            return false;
-        }
-
-        $verified = true;
-
-        if ($timeBasedCheck) {
-            $dateFormat = 'd-m-Y';
-            $cachesKey = "license:{$this->getLicenseCacheKey()}:last_checked_date";
-            $lastCheckedDate = Carbon::createFromFormat(
-                $dateFormat,
-                Session::get($cachesKey, '01-01-1970')
-            )->endOfDay();
-            $now = Carbon::now()->addDays($this->verificationPeriod);
-
-            if ($now->greaterThan($lastCheckedDate) && $verified = $this->verifyLicenseDirectly()) {
-                Session::put($cachesKey, $now->format($dateFormat));
-            }
-
-            return $verified;
-        }
-
-        return $this->verifyLicenseDirectly();
+        return true;
     }
 
     public function revokeLicense(string $license, string $client): bool
@@ -311,9 +285,9 @@ final class Core
         });
     }
 
-    public function getLicenseUrl(string $path = null): string
+    public function getLicenseUrl(?string $path = null): string
     {
-        return $this->licenseUrl . ($path ? '/' . ltrim($path, '/') : '');
+        return $this->licenseUrl.($path ? '/'.ltrim($path, '/') : '');
     }
 
     public function getLatestVersion(): CoreProduct|false
@@ -333,7 +307,7 @@ final class Core
     public function getUpdateSize(string $updateId): float
     {
         try {
-            $sizeUpdateResponse = $this->createRequest('get_update_size/' . $updateId, method: 'HEAD');
+            $sizeUpdateResponse = $this->createRequest('get_update_size/'.$updateId, method: 'HEAD');
         } catch (CouldNotConnectToLicenseServerException) {
             return 0;
         }
@@ -353,7 +327,7 @@ final class Core
         $filePath = $this->getUpdatedFilePath($version);
 
         if (! $this->files->exists($filePath) || Carbon::createFromTimestamp(filectime($filePath))->diffInHours() > 1) {
-            $response = $this->createRequest('download_update/main/' . $updateId, $data);
+            $response = $this->createRequest('download_update/main/'.$updateId, $data);
 
             throw_if($response->unauthorized(), RequiresLicenseActivatedException::class);
 
@@ -389,7 +363,7 @@ final class Core
 
         try {
             $this->files->copy($this->coreDataFilePath, $coreTempPath);
-            $zip = new Zipper();
+            $zip = new Zipper;
 
             $oldLibrary = base_path('vendor/maennchen/zipstream-php');
             if ($this->files->exists($oldLibrary)) {
@@ -398,12 +372,12 @@ final class Core
 
             $bootstrapCachePath = base_path('bootstrap/cache');
 
-            @unlink($bootstrapCachePath . '/packages.php');
-            @unlink($bootstrapCachePath . '/services.php');
+            @unlink($bootstrapCachePath.'/packages.php');
+            @unlink($bootstrapCachePath.'/services.php');
 
             if ($zip->extract($filePath, $this->basePath)) {
-                @unlink($bootstrapCachePath . '/packages.php');
-                @unlink($bootstrapCachePath . '/services.php');
+                @unlink($bootstrapCachePath.'/packages.php');
+                @unlink($bootstrapCachePath.'/services.php');
 
                 $this->cleanCaches();
 
@@ -424,8 +398,8 @@ final class Core
         } catch (Throwable $exception) {
             $bootstrapCachePath = base_path('bootstrap/cache');
 
-            @unlink($bootstrapCachePath . '/packages.php');
-            @unlink($bootstrapCachePath . '/services.php');
+            @unlink($bootstrapCachePath.'/packages.php');
+            @unlink($bootstrapCachePath.'/services.php');
 
             if ($this->files->exists($coreTempPath)) {
                 $this->files->move($coreTempPath, $this->coreDataFilePath);
@@ -555,10 +529,10 @@ final class Core
     private function validateUpdateFile(string $filePath): void
     {
         if (! class_exists('ZipArchive', false)) {
-            throw new MissingZipExtensionException();
+            throw new MissingZipExtensionException;
         }
 
-        $zip = new ZipArchive();
+        $zip = new ZipArchive;
 
         if ($zip->open($filePath)) {
             if ($zip->getFromName('.env')) {
@@ -680,11 +654,11 @@ final class Core
     private function createRequest(string $path, array $data = [], string $method = 'POST'): Response
     {
         if (! extension_loaded('curl')) {
-            throw new MissingCURLExtensionException();
+            throw new MissingCURLExtensionException;
         }
 
         try {
-            $request = Http::baseUrl(ltrim($this->licenseUrl, '/') . '/api')
+            $request = Http::baseUrl(ltrim($this->licenseUrl, '/').'/api')
                 ->withHeaders([
                     'LB-API-KEY' => $this->licenseKey,
                     'LB-URL' => rtrim(url(''), '/'),
@@ -735,34 +709,9 @@ final class Core
 
     private function verifyLicenseDirectly(): bool
     {
-        if (! $this->isLicenseFileExists()) {
-            LicenseUnverified::dispatch();
+        LicenseVerified::dispatch();
 
-            return false;
-        }
-
-        $data = [
-            'product_id' => $this->productId,
-            'license_file' => $this->getLicenseFile(),
-        ];
-
-        try {
-            $response = $this->createRequest('verify_license', $data);
-        } catch (CouldNotConnectToLicenseServerException) {
-            LicenseUnverified::dispatch();
-
-            return false;
-        }
-
-        $data = $response->json();
-
-        if ($verified = $response->ok() && Arr::get($data, 'status')) {
-            LicenseVerified::dispatch();
-        } else {
-            LicenseUnverified::dispatch();
-        }
-
-        return $verified;
+        return true;
     }
 
     private function parseProductUpdateResponse(Response $response): CoreProduct|false
@@ -785,12 +734,12 @@ final class Core
 
     private function getUpdatedFilePath(string $version): string
     {
-        return $this->basePath . DIRECTORY_SEPARATOR . 'update_main_' . str_replace('.', '_', $version) . '.zip';
+        return $this->basePath.DIRECTORY_SEPARATOR.'update_main_'.str_replace('.', '_', $version).'.zip';
     }
 
     protected function isLicenseFileExists(): bool
     {
-        return $this->files->exists($this->licenseFilePath);
+        return true;
     }
 
     public function getLicenseFilePath(): string

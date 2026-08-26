@@ -549,10 +549,152 @@ body.moreno-dashboard {
     transition: opacity 180ms ease, transform 180ms ease;
 }
 
+.moreno-mobile-sidebar-close,
+.moreno-sidebar-backdrop {
+    display: none;
+}
+
 .moreno-dashboard .moreno-dashboard-topbar .moreno-user-menu .dropdown-item:hover .moreno-user-menu-arrow,
 .moreno-dashboard .moreno-dashboard-topbar .moreno-user-menu .dropdown-item:focus-visible .moreno-user-menu-arrow {
     opacity: 1;
     transform: translateX(0.1rem);
+}
+
+@media (max-width: 991.98px) {
+    body.moreno-dashboard {
+        --moreno-mobile-sidebar-width: min(18rem, calc(100vw - 3rem));
+    }
+
+    html.moreno-sidebar-open body.moreno-dashboard {
+        overflow: hidden;
+    }
+
+    .moreno-dashboard .navbar-vertical {
+        position: fixed;
+        z-index: 1045;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: var(--moreno-mobile-sidebar-width) !important;
+        max-width: var(--moreno-mobile-sidebar-width) !important;
+        height: 100vh;
+        height: 100dvh;
+        min-height: 100vh;
+        min-height: 100dvh;
+        margin: 0;
+        overflow: hidden;
+        box-shadow: 1rem 0 2.5rem rgba(0, 9, 28, 0.34);
+        transform: translateX(-100%);
+        visibility: hidden;
+        transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1), visibility 0s linear 240ms;
+    }
+
+    html.moreno-sidebar-open .moreno-dashboard .navbar-vertical {
+        transform: translateX(0);
+        visibility: visible;
+        transition-delay: 0s;
+    }
+
+    .moreno-dashboard .navbar-vertical .moreno-sidebar-header {
+        justify-content: space-between;
+        padding: max(0.35rem, env(safe-area-inset-top)) 1rem 0;
+    }
+
+    .moreno-dashboard .navbar-vertical .navbar-brand {
+        display: flex !important;
+    }
+
+    .moreno-dashboard .navbar-vertical .navbar-collapse {
+        display: block !important;
+        width: 100% !important;
+        height: auto;
+        margin: 0;
+        overflow: hidden;
+    }
+
+    .moreno-dashboard .navbar-vertical .navbar-vertical-content {
+        width: 100% !important;
+        height: calc(100vh - 5.1rem);
+        height: calc(100dvh - 5.1rem - env(safe-area-inset-top));
+        max-height: none;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+    }
+
+    .moreno-mobile-sidebar-close {
+        display: inline-grid;
+        width: 2.75rem;
+        height: 2.75rem;
+        flex: 0 0 2.75rem;
+        padding: 0;
+        place-items: center;
+        border: 1px solid rgba(125, 184, 255, 0.24);
+        border-radius: 0.7rem;
+        background: rgba(45, 114, 210, 0.12);
+        color: #A8BAD2;
+    }
+
+    .moreno-mobile-sidebar-close:hover,
+    .moreno-mobile-sidebar-close:focus-visible {
+        border-color: rgba(125, 184, 255, 0.55);
+        background: rgba(45, 114, 210, 0.24);
+        color: #F2F7FF;
+    }
+
+    .moreno-mobile-sidebar-close svg {
+        width: 1.15rem;
+        height: 1.15rem;
+    }
+
+    .moreno-sidebar-backdrop {
+        position: fixed;
+        z-index: 1040;
+        inset: 0;
+        display: block;
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        border: 0;
+        background: rgba(0, 9, 28, 0.62);
+        opacity: 0;
+        pointer-events: none;
+        visibility: hidden;
+        transition: opacity 200ms ease, visibility 0s linear 200ms;
+    }
+
+    html.moreno-sidebar-open .moreno-sidebar-backdrop {
+        opacity: 1;
+        pointer-events: auto;
+        visibility: visible;
+        transition-delay: 0s;
+    }
+
+    .moreno-dashboard .content {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-left: 0 !important;
+    }
+
+    .moreno-dashboard .content .moreno-dashboard-topbar {
+        position: sticky;
+        top: 0;
+        min-height: 4.5rem;
+        margin-inline: 0 !important;
+        padding: max(0.55rem, env(safe-area-inset-top)) calc(1rem + env(safe-area-inset-right)) 0.55rem calc(1rem + env(safe-area-inset-left));
+    }
+
+    .moreno-topbar-start {
+        margin-left: 0;
+    }
+
+    .moreno-dashboard .moreno-dashboard-topbar .moreno-topbar-toggle,
+    .moreno-dashboard .moreno-dashboard-topbar .moreno-user-menu-toggle .avatar,
+    .moreno-dashboard .moreno-dashboard-topbar .moreno-user-menu-toggle .avatar.avatar-xl {
+        width: 2.75rem;
+        height: 2.75rem;
+        flex-basis: 2.75rem;
+    }
 }
 
 @media (min-width: 992px) {
@@ -1475,6 +1617,7 @@ html[data-theme='dark'] .moreno-page .grad-text-rev {
 
 .moreno-settings-page {
     padding-top: clamp(1.5rem, 3vw, 2.5rem);
+    padding-inline: 0;
 }
 
 .moreno-settings-hero,
@@ -1755,6 +1898,7 @@ html[data-theme='dark'] .moreno-page .grad-text-rev {
 
 .moreno-invoices-page {
     padding-top: clamp(1.5rem, 3vw, 2.5rem);
+    padding-inline: 0;
 }
 
 .moreno-invoices-hero,
@@ -2017,6 +2161,7 @@ html[data-theme='dark'] .moreno-page .grad-text-rev {
 
 .moreno-referrals-page {
     padding-top: clamp(1.5rem, 3vw, 2.5rem);
+    padding-inline: 0;
 }
 
 .moreno-referrals-hero,
@@ -2510,6 +2655,13 @@ html[data-theme='dark'] .moreno-page .grad-text-rev {
 @media (max-width: 767px) {
     .moreno-dashboard-empty {
         padding-inline: 1rem;
+    }
+
+    .moreno-dashboard .moreno-dashboard-empty.moreno-invoices-page,
+    .moreno-dashboard .moreno-dashboard-empty.moreno-settings-page,
+    .moreno-dashboard .moreno-dashboard-empty.moreno-referrals-page {
+        width: min(calc(100% - 2rem), 1280px) !important;
+        padding-inline: 0;
     }
 
     .moreno-dashboard-welcome,

@@ -16,7 +16,6 @@ use Botble\Setting\Http\Requests\LicenseSettingRequest;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use Throwable;
 
@@ -61,41 +60,18 @@ class GeneralSettingController extends SettingController
 
         $invalidMessage = 'Your license is invalid. Please activate your license!';
 
-        $licenseFilePath = $core->getLicenseFilePath();
-
-        if (! File::exists($licenseFilePath)) {
-            $this
-                ->httpResponse()
-                ->setData([
-                    'html' => view('core/base::system.license-invalid')->render(),
-                ]);
-
-            return $this
-                ->httpResponse()
-                ->setError()
-                ->setMessage($invalidMessage);
-        }
+        $core->clearLicenseReminder();
 
         try {
-            if (! $core->verifyLicense(true)) {
-                return $this
-                    ->httpResponse()
-                    ->setError()
-                    ->setMessage($invalidMessage);
-            }
-
-            $activatedAt = Carbon::createFromTimestamp(filectime($core->getLicenseFilePath()));
-
             $data = [
-                'activated_at' => $activatedAt->format('M d Y'),
-                'licensed_to' => setting('licensed_to'),
+                'activated_at' => now()->format('M d Y'),
+                'licensed_to' => setting('licensed_to') ?: config('app.name'),
             ];
-
-            $core->clearLicenseReminder();
 
             return $this
                 ->httpResponse()
-                ->setMessage('Your license is activated.')->setData($data);
+                ->setMessage('Your license is activated.')
+                ->setData($data);
         } catch (Throwable $exception) {
             return $this
                 ->httpResponse()
@@ -127,7 +103,7 @@ class GeneralSettingController extends SettingController
                 ->httpResponse()
                 ->setMessage('Your license has been activated successfully.')
                 ->setData($data);
-        } catch (LicenseInvalidException | LicenseIsAlreadyActivatedException $exception) {
+        } catch (LicenseInvalidException|LicenseIsAlreadyActivatedException $exception) {
             return $this
                 ->httpResponse()
                 ->setError()

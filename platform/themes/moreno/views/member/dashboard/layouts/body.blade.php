@@ -4,6 +4,7 @@
 <main class="main" id="top">
     <div class="container-fluid px-0" data-layout="container-fluid">
         @include('theme.moreno::views.member.dashboard.layouts.navs')
+        <button class="moreno-sidebar-backdrop" type="button" aria-label="Cerrar menú lateral" tabindex="-1"></button>
         <div class="content">
             @include('theme.moreno::views.member.dashboard.layouts.sidebar')
             @yield('content')

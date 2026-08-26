@@ -109,8 +109,33 @@
 
 @include('plugins/custom-field::_script-templates.render-custom-fields')
 
+@push('header')
+    <link href="{{ asset('vendor/core/core/base/libraries/flatpickr/flatpickr.min.css') }}" rel="stylesheet">
+@endpush
+
 @push('scripts')
+    <script src="{{ asset('vendor/core/core/js-validation/js/js-validation.js') }}"></script>
+    <script src="{{ asset('vendor/core/core/base/libraries/flatpickr/flatpickr.min.js') }}"></script>
     <script>
+        (() => {
+            if (typeof window.flatpickr !== 'function') {
+                return;
+            }
+
+            document.querySelectorAll('.moreno-settings-page .datepicker').forEach((datePicker) => {
+                if (datePicker._flatpickr) {
+                    return;
+                }
+
+                const input = datePicker.querySelector('[data-input]');
+
+                window.flatpickr(datePicker, {
+                    dateFormat: input?.dataset.dateFormat || 'Y-m-d',
+                    wrap: true,
+                });
+            });
+        })();
+
         (() => {
             const refByInput = document.querySelector('[name=ref_by]');
 

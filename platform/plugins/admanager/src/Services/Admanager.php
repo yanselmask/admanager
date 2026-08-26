@@ -272,6 +272,7 @@ class Admanager
         return match ($dateRangeType) {
             'THIS_WEEK' => [now()->startOfWeek(setting('week_start')), now()->today()],
             'THIS_MONTH' => [now()->startOfMonth(), now()->today()],
+            'THIS_YEAR' => [now()->startOfYear(), now()->today()],
             'LAST_2_MONTHS' => [now()->subMonths(2)->startOfMonth(), now()->today()],
             'LAST_4_MONTHS' => [now()->subMonths(4)->startOfMonth(), now()->today()],
             'LAST_5_MONTHS' => [now()->subMonths(5)->startOfMonth(), now()->today()],

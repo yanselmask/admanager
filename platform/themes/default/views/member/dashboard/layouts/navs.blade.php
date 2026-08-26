@@ -1,3 +1,4 @@
+@php($dashboardNs = Theme::getThemeNamespace('views.member.dashboard'))
 <script>
     var isFluid = JSON.parse(localStorage.getItem('isFluid'));
     if (isFluid) {
@@ -6,33 +7,29 @@
         container.classList.add('container-fluid');
     }
 </script>
-<nav class="navbar navbar-light navbar-vertical navbar-expand-lg" style="display: none;" aria-label="Navegación principal">
+<nav class="navbar navbar-light navbar-vertical navbar-expand-xl" style="display: none;">
     <script>
         var navbarStyle = localStorage.getItem("navbarStyle");
         if (navbarStyle && navbarStyle !== 'transparent') {
             document.querySelector('.navbar-vertical').classList.add(`navbar-${navbarStyle}`);
         }
     </script>
-    <div class="moreno-sidebar-header d-flex align-items-center">
+    <div class="d-flex align-items-center">
+        <div class="toggle-icon-wrapper">
+            <button class="btn navbar-toggler-humburger-icon navbar-vertical-toggle" data-bs-toggle="tooltip" data-bs-placement="left" title="Toggle Navigation"><span class="navbar-toggle-icon"><span class="toggle-line"></span></span></button>
+        </div>
         <a class="navbar-brand" href="{{route('public.member.dashboard')}}">
             <div class="d-flex align-items-center py-3">
-                @include('theme.moreno::partials.brand-logo')
+                {!! Theme::getLogoImage(maxHeight: 40) !!}
             </div>
         </a>
-        <button class="btn moreno-mobile-sidebar-close" type="button" aria-label="Cerrar menú lateral">
-            <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
-                <path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2" />
-            </svg>
-        </button>
     </div>
     <div class="collapse navbar-collapse" id="navbarVerticalCollapse">
         <div class="navbar-vertical-content scrollbar">
-            <div class="moreno-sidebar-section-label">Tu espacio</div>
-            @include('theme.moreno::views.member.dashboard.layouts.menu')
+            @include($dashboardNs . '.layouts.menu')
         </div>
     </div>
 </nav>
 <nav class="navbar navbar-light navbar-glass navbar-top navbar-expand-lg" style="display: none;">
     <button class="btn navbar-toggler-humburger-icon navbar-toggler me-1 me-sm-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarStandard" aria-controls="navbarStandard" aria-expanded="false" aria-label="Toggle Navigation"><span class="navbar-toggle-icon"><span class="toggle-line"></span></span></button>
-
 </nav>
