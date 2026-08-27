@@ -23,7 +23,10 @@
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="CACHE_STORE" value="array"/>
         <env name="DB_CONNECTION" value="sqlite"/>
-        <env name="DB_DATABASE" value=":memory:"/>
+        <!-- Base preparada por tests/prepare-database.sh. No se usa :memory: porque Botble
+             registra las migraciones de cada plugin a partir del setting `activated_plugins`,
+             que se lee de la BD al arrancar: una base vacía no tiene plugins activos. -->
+        <env name="DB_DATABASE" value="database/testing.sqlite"/>
         <env name="MAIL_MAILER" value="array"/>
         <env name="PULSE_ENABLED" value="false"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
