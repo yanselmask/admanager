@@ -1,5 +1,19 @@
 @extends('theme.moreno::views.member.dashboard.layouts.master')
 
+@push('header')
+    <style>
+        /* El CSS del tema da min-height a .moreno-analytics-period pero no centra el
+           contenido: funciona con los <button> del panel de creadores, no con los <a>
+           que usa este panel, donde el texto queda arriba y sobra espacio abajo. */
+        a.moreno-analytics-period {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+        }
+    </style>
+@endpush
+
 @php
     $hour = (int) now()->format('H');
     $greeting = $hour < 12 ? 'Buenos días' : ($hour < 18 ? 'Buenas tardes' : 'Buenas noches');
