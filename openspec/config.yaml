@@ -1,0 +1,42 @@
+schema: spec-driven
+
+context: |
+  Proyecto: AdManager — plataforma Laravel 10 / PHP 8.4 sobre Botble CMS 7.x.
+  Idioma de trabajo: español (proposals, design y tasks en español; código e identificadores en inglés).
+
+  Estructura:
+    platform/plugins/<slug>/   plugins Botble (plugin.json, src/{Models,Forms,Tables,Http,Providers,Services}, routes/, config/permissions.php, database/migrations/, resources/lang|views)
+    platform/themes/<slug>/    temas. Tema activo: `default`.
+
+  Plugins de dominio relevantes:
+    - domain    → modelo Domain (tabla `domains`): url, network_code, member_id,
+                  commissions, commissions_network, commissions_webmaster,
+                  y columnas JSON earnings/impressions/clicks/ctrs/ecpms indexadas por
+                  periodo ("today", "this_month", ...). Métodos getEarning/getClicks/... aplican comisión.
+    - admanager → servicio Botble\Admanager\Services\Admanager: descarga reportes de
+                  Google Ad Manager por network code a CSV y vuelca los valores en `domains`.
+                  Settings: `admanager_networks` (repeater code/name), `percentage_default`,
+                  `referral_commissions`. Helpers: getValueWithCommissions() / getValueWithCommissionsInverse()
+                  (los valores crudos vienen en micros → dividir entre 1_000_000).
+    - member    → guard `member`, tabla `members`. Panel público en /account/* (rutas `public.member.*`),
+                  vistas en platform/themes/default/views/member/dashboard/ con su propio layout master.
+                  Menú del panel vía DashboardMenu::for('member').
+
+  Convenciones obligatorias:
+    - Seguir laravel-boost guidelines del CLAUDE.md: tipos de retorno explícitos, promoción de propiedades
+      en constructor, Form Requests para validación, Eloquent sobre DB::, named routes, config() no env().
+    - Casts con `protected $casts = []` (Laravel 10, no el método casts()).
+    - Migraciones idempotentes (Schema::hasTable / hasColumn) como en el resto del proyecto.
+    - Ejecutar `vendor/bin/pint --dirty` antes de cerrar cambios.
+    - Tests con PHPUnit (`php artisan test --compact --filter=...`).
+
+rules:
+  proposal:
+    - Escribir en español.
+    - Incluir siempre una sección de "No incluido" (non-goals).
+  design:
+    - Escribir en español.
+    - Nombrar archivos concretos del repo (rutas reales) para cada decisión.
+  tasks:
+    - Escribir en español.
+    - Cada tarea debe nombrar los archivos que crea o modifica.

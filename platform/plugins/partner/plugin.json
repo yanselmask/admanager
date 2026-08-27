@@ -1,0 +1,11 @@
+{
+    "id": "yanselmask/partner",
+    "name": "Partner",
+    "namespace": "Botble\\Partner\\",
+    "provider": "Botble\\Partner\\Providers\\PartnerServiceProvider",
+    "author": "Yanselmask",
+    "url": "https://yanselmask.com",
+    "version": "1.0.0",
+    "description": "Rol partner: cuentas de Ad Manager asignadas, ganancias con comisión propia y panel dedicado.",
+    "minimum_core_version": "7.4.7"
+}
