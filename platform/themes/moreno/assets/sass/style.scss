@@ -2838,3 +2838,69 @@ figcaption {
     text-align: center;
 }
 /* purgecss end ignore */
+
+/* Dashboard light mode: Falcon only sets data-bs-theme="dark" for dark, so light is "not dark". */
+html:not([data-bs-theme='dark']) .moreno-dashboard .navbar-vertical .navbar-vertical-content {
+    background: transparent !important;
+}
+
+html:not([data-bs-theme='dark']) .moreno-dashboard .navbar-vertical .nav-link {
+    color: #45617F !important;
+}
+
+html:not([data-bs-theme='dark']) .moreno-dashboard .navbar-vertical .nav-link-icon {
+    border-color: var(--ms-border);
+    background: var(--ms-surface);
+}
+
+html:not([data-bs-theme='dark']) .moreno-dashboard .navbar-vertical .nav-link:hover,
+html:not([data-bs-theme='dark']) .moreno-dashboard .navbar-vertical .nav-link:focus-visible {
+    background: rgba(0, 74, 173, 0.07);
+    color: var(--ms-brand) !important;
+}
+
+html:not([data-bs-theme='dark']) .moreno-dashboard .navbar-vertical .nav-link.active {
+    border-color: rgba(0, 74, 173, 0.22);
+    background: rgba(0, 74, 173, 0.08);
+    color: var(--ms-brand) !important;
+}
+
+html:not([data-bs-theme='dark']) .moreno-dashboard .navbar-vertical .nav-link.active .nav-link-icon {
+    border-color: rgba(0, 74, 173, 0.28);
+    background: rgba(0, 74, 173, 0.12);
+    color: var(--ms-brand);
+}
+
+html:not([data-bs-theme='dark']) .moreno-dashboard-welcome,
+html:not([data-bs-theme='dark']) .moreno-settings-hero,
+html:not([data-bs-theme='dark']) .moreno-invoices-hero,
+html:not([data-bs-theme='dark']) .moreno-referrals-hero {
+    background: linear-gradient(135deg, #E5EFFF 0%, #F4F8FD 62%, #DCE9FB 100%);
+    border-color: #B8D0F2;
+    color: var(--ms-text);
+}
+
+html:not([data-bs-theme='dark']) .moreno-dashboard-welcome p,
+html:not([data-bs-theme='dark']) .moreno-settings-hero p,
+html:not([data-bs-theme='dark']) .moreno-invoices-hero p,
+html:not([data-bs-theme='dark']) .moreno-referrals-hero p {
+    color: var(--ms-muted);
+}
+
+html:not([data-bs-theme='dark']) .moreno-dashboard-welcome .moreno-dashboard-kicker,
+html:not([data-bs-theme='dark']) .moreno-dashboard-next-steps .moreno-dashboard-kicker {
+    color: var(--ms-brand-bright);
+}
+
+html:not([data-bs-theme='dark']) .moreno-dashboard-welcome-mark,
+html:not([data-bs-theme='dark']) .moreno-settings-hero-mark,
+html:not([data-bs-theme='dark']) .moreno-invoices-hero-mark,
+html:not([data-bs-theme='dark']) .moreno-referrals-hero-mark {
+    border-color: rgba(0, 74, 173, 0.22);
+    background: rgba(255, 255, 255, 0.72);
+    color: var(--ms-brand);
+}
+
+html:not([data-bs-theme='dark']) .moreno-settings-status {
+    color: var(--ms-success);
+}
