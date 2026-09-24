@@ -12,8 +12,8 @@
         @endif
         <title>{{ PageTitle::getTitle(false) }}</title>
         <script src="https://cdn.tailwindcss.com"></script>
-        <link rel="stylesheet" href="{{ Theme::asset()->url('css/style.css') }}">
-        <script src="{{ Theme::asset()->url('js/script.js') }}" defer></script>
+        <link rel="stylesheet" href="{{ Theme::asset()->url('css/style.css') }}?v={{ @filemtime(public_path('themes/' . Theme::getThemeName() . '/css/style.css')) }}">
+        <script src="{{ Theme::asset()->url('js/script.js') }}?v={{ @filemtime(public_path('themes/' . Theme::getThemeName() . '/js/script.js')) }}" defer></script>
     </head>
     <body {!! Theme::bodyAttributes() !!} >
         <header class="moreno-site-header sticky top-0 w-full z-50 backdrop-blur border-b">

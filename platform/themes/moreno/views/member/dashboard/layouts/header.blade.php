@@ -11,7 +11,7 @@
 <link href="{{asset('custom/amauri/assets/css/user-rtl.min.css')}}" rel="stylesheet" id="user-style-rtl">
 <link href="{{asset('custom/amauri/assets/css/user.min.css')}}" rel="stylesheet" id="user-style-default">
 <link href="{{asset('custom/amauri/toast-magic.css')}}" rel="stylesheet" id="user-style-default">
-<link href="{{ Theme::asset()->url('css/style.css') }}" rel="stylesheet" id="moreno-style">
+<link href="{{ Theme::asset()->url('css/style.css') }}?v={{ @filemtime(public_path('themes/' . Theme::getThemeName() . '/css/style.css')) }}" rel="stylesheet" id="moreno-style">
 <style>
     :root {
         /* Variables por defecto (light mode) */
