@@ -17,7 +17,7 @@
     @if($networks->isNotEmpty() && ($visibleMetrics['earning'] ?? true))
         <div class="card border-0 mb-4" style="background: var(--ms-surface, #191d24);">
             <div class="card-body p-4">
-                <h5 class="mb-3">Evolución de ganancias</h5>
+                <h5 class="mb-3" style="color: var(--ms-text);">Evolución de ganancias</h5>
                 <div id="partner-earnings-chart" style="height: 320px;"></div>
             </div>
         </div>
@@ -33,15 +33,27 @@
 
                     var chart = echarts.init(el);
 
+                    var themeColors = function () {
+                        var styles = getComputedStyle(document.documentElement);
+
+                        return {
+                            label: styles.getPropertyValue('--ms-muted').trim() || '#8b95a3',
+                            grid: styles.getPropertyValue('--ms-border').trim() || '#232830'
+                        };
+                    };
+
+                    var colors = themeColors();
+
                     chart.setOption({
                         tooltip: { trigger: 'axis' },
-                        grid: { left: 56, right: 20, top: 24, bottom: 40 },
+                        grid: { left: 8, right: 20, top: 24, bottom: 8, containLabel: true },
                         xAxis: {
                             type: 'category',
                             data: @json(array_values(array_map(fn ($k) => trans('plugins/partner::partner.periods.' . $k), array_keys($series)))),
-                            axisLabel: { color: '#8b95a3', rotate: 30 }
+                            axisLabel: { color: colors.label, rotate: 30 },
+                            axisLine: { lineStyle: { color: colors.grid } }
                         },
-                        yAxis: { type: 'value', axisLabel: { color: '#8b95a3' }, splitLine: { lineStyle: { color: '#232830' } } },
+                        yAxis: { type: 'value', axisLabel: { color: colors.label }, splitLine: { lineStyle: { color: colors.grid } } },
                         series: [{
                             name: @json(trans('plugins/partner::partner.dashboard.earning')),
                             type: 'bar',
@@ -51,6 +63,15 @@
                     });
 
                     window.addEventListener('resize', function () { chart.resize(); });
+
+                    new MutationObserver(function () {
+                        var updated = themeColors();
+
+                        chart.setOption({
+                            xAxis: { axisLabel: { color: updated.label }, axisLine: { lineStyle: { color: updated.grid } } },
+                            yAxis: { axisLabel: { color: updated.label }, splitLine: { lineStyle: { color: updated.grid } } }
+                        });
+                    }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-bs-theme', 'data-theme'] });
                 })();
             </script>
         @endpush

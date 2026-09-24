@@ -2904,3 +2904,9 @@ html:not([data-bs-theme='dark']) .moreno-referrals-hero-mark {
 html:not([data-bs-theme='dark']) .moreno-settings-status {
     color: var(--ms-success);
 }
+
+html:not([data-bs-theme='dark']) .moreno-dashboard .badge.bg-success {
+    border: 1px solid rgba(22, 138, 100, 0.28);
+    background: rgba(22, 138, 100, 0.12) !important;
+    color: var(--ms-success) !important;
+}
