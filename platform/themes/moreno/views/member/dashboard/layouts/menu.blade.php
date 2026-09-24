@@ -6,7 +6,7 @@
                 href="{{ $item['url']  }}"
                 @class([
                     'nav-link' => true,
-                    'active' => $item['active'],
+                    'active' => $item['active'] && $item['id'] !== 'cms-member-homepage',
                     ])
             >
                 <div class="d-flex align-items-center">
