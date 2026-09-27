@@ -58,7 +58,7 @@ return [
     ],
     'settings' => [
         'title' => 'Partners',
-        'description' => 'Configure the partner commission and how their earnings are calculated.',
+        'description' => 'Configure the partner commission, how their earnings are calculated and what the panel shows by default. Each partner can override the panel visibility on its own page.',
         'percentage_default' => 'Default partner commission (%)',
         'percentage_default_helper' => 'Applied when neither the assigned account nor the partner defines its own commission.',
         'earning_base' => 'Earning base',

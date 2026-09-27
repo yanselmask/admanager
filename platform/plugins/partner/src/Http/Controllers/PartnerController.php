@@ -77,7 +77,7 @@ class PartnerController extends BaseController
     }
 
     /**
-     * `role` y `commission` no están en el `$fillable` de Member — el plugin `member`
+     * `role`, `commission` y `partner_visibility` no están en el `$fillable` de Member — el plugin `member`
      * no se modifica — así que se asignan por propiedad.
      */
     protected function applyRole(Member $member, PartnerRequest $request): void
@@ -86,6 +86,10 @@ class PartnerController extends BaseController
         $member->setAttribute('commission', $request->input('commission') === null || $request->input('commission') === ''
             ? null
             : (float) $request->input('commission'));
+
+        $overrides = $request->visibilityOverrides();
+        $member->setAttribute('partner_visibility', $overrides ? json_encode($overrides) : null);
+
         $member->save();
     }
 }

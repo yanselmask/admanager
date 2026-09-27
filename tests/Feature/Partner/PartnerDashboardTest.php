@@ -220,18 +220,100 @@ class PartnerDashboardTest extends TestCase
         $this->assertNotContains('cms-partner-domains', $this->menuFor($this->partnerWith('123456')));
     }
 
+    public function test_a_partner_override_hides_a_metric_only_for_that_partner(): void
+    {
+        $hidden = $this->partnerWith('123456');
+        $hidden->setAttribute('partner_visibility', json_encode(['ecpms_partner' => false]))->save();
+        $other = $this->partnerWith('789012');
+        $ecpm = trans('plugins/partner::partner.dashboard.ecpm');
+
+        $this->actingAs($hidden, 'member')
+            ->get(route('partner.dashboard'))
+            ->assertOk()
+            ->assertDontSee($ecpm);
+
+        $this->actingAs($other, 'member')
+            ->get(route('partner.dashboard'))
+            ->assertOk()
+            ->assertSee($ecpm);
+    }
+
+    public function test_a_partner_override_shows_a_metric_the_general_setting_hides(): void
+    {
+        Setting::set('ecpms_partner', false)->save();
+
+        $partner = $this->partnerWith('123456');
+        $partner->setAttribute('partner_visibility', json_encode(['ecpms_partner' => true]))->save();
+
+        $this->actingAs($partner, 'member')
+            ->get(route('partner.dashboard'))
+            ->assertOk()
+            ->assertSee(trans('plugins/partner::partner.dashboard.ecpm'));
+    }
+
+    public function test_a_partner_override_can_hide_the_domains(): void
+    {
+        $partner = $this->partnerWith('123456');
+        $partner->setAttribute('partner_visibility', json_encode(['domains_partner' => false]))->save();
+
+        $this->assertNotContains('cms-partner-domains', $this->menuFor($partner));
+
+        $this->actingAs($partner, 'member')
+            ->get(route('partner.domains'))
+            ->assertRedirect(route('partner.dashboard'));
+    }
+
+    public function test_the_admin_saves_and_clears_the_partner_overrides(): void
+    {
+        $partner = $this->partnerWith('123456');
+        $admin = $this->admin();
+        $payload = [
+            'member_id' => $partner->getKey(),
+            'role' => PartnerRoleEnum::PARTNER,
+            'commission' => '',
+        ];
+
+        $this->actingAs($admin)
+            ->post(route('partner.edit.update', $partner->getKey()), $payload + [
+                'visibility_domains_partner' => '0',
+                'visibility_ecpms_partner' => '1',
+                'visibility_clicks_partner' => '',
+            ])
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame(
+            ['domains_partner' => false, 'ecpms_partner' => true],
+            json_decode($partner->fresh()->getAttribute('partner_visibility'), true)
+        );
+
+        $this->actingAs($admin)
+            ->get(route('partner.edit', $partner->getKey()))
+            ->assertOk()
+            ->assertSee('name="visibility_domains_partner"', false);
+
+        $this->actingAs($admin)
+            ->post(route('partner.edit.update', $partner->getKey()), $payload)
+            ->assertSessionHasNoErrors();
+
+        $this->assertNull($partner->fresh()->getAttribute('partner_visibility'));
+    }
+
+    public function test_an_invalid_override_is_rejected(): void
+    {
+        $partner = $this->partnerWith('123456');
+
+        $this->actingAs($this->admin())
+            ->post(route('partner.edit.update', $partner->getKey()), [
+                'member_id' => $partner->getKey(),
+                'role' => PartnerRoleEnum::PARTNER,
+                'visibility_domains_partner' => 'maybe',
+            ])
+            ->assertSessionHasErrors('visibility_domains_partner');
+    }
+
     public function test_the_admin_menu_links_to_the_partner_list(): void
     {
-        $admin = \Botble\ACL\Models\User::query()->forceCreate([
-            'first_name' => 'Test',
-            'last_name' => 'Admin',
-            'username' => 'admin_'.uniqid(),
-            'email' => uniqid().'@example.test',
-            'password' => 'secret-password',
-        ]);
-        $admin->forceFill(['super_user' => true])->save();
-
-        $this->actingAs($admin);
+        $this->actingAs($this->admin());
 
         $items = collect(\Botble\Base\Facades\DashboardMenu::getAll())
             ->firstWhere('id', 'cms-plugins-partner')['children'] ?? [];
@@ -350,6 +432,20 @@ class PartnerDashboardTest extends TestCase
             'role' => PartnerRoleEnum::PARTNER,
             'commission' => $commission,
         ]);
+    }
+
+    protected function admin(): \Botble\ACL\Models\User
+    {
+        $admin = \Botble\ACL\Models\User::query()->forceCreate([
+            'first_name' => 'Test',
+            'last_name' => 'Admin',
+            'username' => 'admin_'.uniqid(),
+            'email' => uniqid().'@example.test',
+            'password' => 'secret-password',
+        ]);
+        $admin->forceFill(['super_user' => true])->save();
+
+        return $admin;
     }
 
     protected function partnerWith(string $networkCode, ?float $commission = null): Member

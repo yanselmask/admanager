@@ -175,7 +175,7 @@ class PartnerServiceProvider extends ServiceProvider
                         ->icon('ti ti-briefcase')
                 );
 
-            if (! setting('domains_partner', true)) {
+            if (! PartnerHelper::visibleMetrics(auth('member')->user())['domains']) {
                 return;
             }
 

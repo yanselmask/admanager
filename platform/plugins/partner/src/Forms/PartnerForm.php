@@ -10,6 +10,7 @@ use Botble\Base\Forms\FormAbstract;
 use Botble\Member\Models\Member;
 use Botble\Partner\Enums\PartnerRoleEnum;
 use Botble\Partner\Http\Requests\PartnerRequest;
+use Botble\Partner\Supports\PartnerHelper;
 
 class PartnerForm extends FormAbstract
 {
@@ -53,6 +54,26 @@ class PartnerForm extends FormAbstract
                         'value' => (float) setting('partner_percentage_default', 0),
                     ]))
             );
+
+        $overrides = $isExisting ? PartnerHelper::visibilityOverrides($model) : [];
+
+        foreach (PartnerSettingForm::METRICS as $setting => $label) {
+            $globalLabel = setting($setting, true) ? 'Mostrar' : 'Ocultar';
+
+            $this->add(
+                'visibility_'.$setting,
+                SelectField::class,
+                SelectFieldOption::make()
+                    ->label('Panel: '.trans('plugins/partner::partner.'.$label))
+                    ->choices([
+                        '' => 'Como la configuración general ('.$globalLabel.')',
+                        '1' => 'Mostrar',
+                        '0' => 'Ocultar',
+                    ])
+                    ->selected(array_key_exists($setting, $overrides) ? (string) (int) $overrides[$setting] : '')
+                    ->colspan(1)
+            );
+        }
     }
 
     /**

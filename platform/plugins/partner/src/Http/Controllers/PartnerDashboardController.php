@@ -4,8 +4,8 @@ namespace Botble\Partner\Http\Controllers;
 
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Member\Models\Member;
-use Botble\Partner\Forms\PartnerSettingForm;
 use Botble\Partner\Services\PartnerEarningService;
+use Botble\Partner\Supports\PartnerHelper;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -28,7 +28,7 @@ class PartnerDashboardController extends BaseController
             'periods' => PartnerEarningService::PERIODS,
             'metrics' => $this->earnings->forPartner($partner, $period),
             'networks' => $this->earnings->networksOf($partner),
-            'visibleMetrics' => $this->visibleMetrics(),
+            'visibleMetrics' => PartnerHelper::visibleMetrics($partner),
             'series' => $this->earnings->seriesFor($partner),
         ]);
     }
@@ -45,17 +45,18 @@ class PartnerDashboardController extends BaseController
             'period' => $period,
             'periods' => PartnerEarningService::PERIODS,
             'accounts' => $this->earnings->byNetwork($partner, $period),
-            'visibleMetrics' => $this->visibleMetrics(),
+            'visibleMetrics' => PartnerHelper::visibleMetrics($partner),
         ]);
     }
 
     public function domains(Request $request): View|RedirectResponse
     {
-        if (! setting('domains_partner', true)) {
+        $partner = $this->partner();
+
+        if (! PartnerHelper::visibleMetrics($partner)['domains']) {
             return redirect()->route('partner.dashboard');
         }
 
-        $partner = $this->partner();
         $period = $this->earnings->resolvePeriod($request->query('period'));
         $networks = $this->earnings->networksOf($partner);
         $selected = $this->selectedNetwork($request);
@@ -75,7 +76,7 @@ class PartnerDashboardController extends BaseController
             'selectedNetwork' => $selected,
             'domains' => $domains,
             'metricsOf' => fn ($domain) => $this->earnings->forDomains($partner, [$domain], $period, $networks),
-            'visibleMetrics' => $this->visibleMetrics(),
+            'visibleMetrics' => PartnerHelper::visibleMetrics($partner),
         ]);
     }
 
@@ -115,20 +116,6 @@ class PartnerDashboardController extends BaseController
         $owned = array_map('strval', $ownedCodes);
 
         return in_array($selected, $owned, true) ? [$selected] : [];
-    }
-
-    /**
-     * @return array<string, bool>
-     */
-    protected function visibleMetrics(): array
-    {
-        $visible = [];
-
-        foreach (array_keys(PartnerSettingForm::METRICS) as $setting) {
-            $visible[str_replace('_partner', '', $setting)] = (bool) setting($setting, true);
-        }
-
-        return $visible;
     }
 
     /**
