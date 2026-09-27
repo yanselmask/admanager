@@ -170,6 +170,9 @@
                                         <span class="moreno-invoice-status {{ $statusMeta['class'] }}">
                                             <span aria-hidden="true"></span>{{ $statusMeta['label'] }}
                                         </span>
+                                        @if($invoice->payment_method_label)
+                                            <small class="moreno-invoice-method">vía {{ $invoice->payment_method_label }}</small>
+                                        @endif
                                     </td>
                                 </tr>
                             @endforeach

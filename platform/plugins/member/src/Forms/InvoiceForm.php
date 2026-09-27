@@ -13,6 +13,7 @@ use Botble\Member\Enums\InvoiceStatus;
 use Botble\Member\Http\Requests\InvoiceRequest;
 use Botble\Member\Models\Invoice;
 use Botble\Member\Models\Member;
+use Botble\Member\Models\MemberPaymentMethod;
 
 class InvoiceForm extends FormAbstract
 {
@@ -44,12 +45,44 @@ class InvoiceForm extends FormAbstract
                     ->choices(is_plugin_active('member') ? Member::query()->pluck('first_name', 'id')->toArray() : [])
                     ->searchable()
             )
+            ->add('payment_method_id',
+                SelectField::class,
+                SelectFieldOption::make()
+                    ->label('Método de pago usado')
+                    ->choices(['' => 'Sin especificar'] + $this->paymentMethodChoices())
+                    ->searchable()
+                    ->helperText('Debe ser uno de los métodos del miembro de esta factura.')
+            )
             ->add('status',
                 SelectField::class,
                 SelectFieldOption::make()
-                ->label(__('Status'))
-                ->choices(InvoiceStatus::choices())
+                    ->label(__('Status'))
+                    ->choices(InvoiceStatus::choices())
             )
             ->setBreakFieldPoint('status');
+    }
+
+    /**
+     * Al editar se ofrecen solo los métodos del miembro de la factura; al crear, los de todos,
+     * con el nombre del miembro delante para distinguirlos.
+     *
+     * @return array<int, string>
+     */
+    protected function paymentMethodChoices(): array
+    {
+        $memberId = $this->getModel()->member_id ?? null;
+
+        return MemberPaymentMethod::query()
+            ->with('member:id,first_name,last_name')
+            ->when($memberId, fn ($query) => $query->where('member_id', $memberId))
+            ->orderByDesc('is_default')
+            ->latest()
+            ->get()
+            ->mapWithKeys(fn (MemberPaymentMethod $method) => [
+                $method->getKey() => ($memberId ? '' : $method->member?->name.' — ')
+                    .$method->type->label().' · '.$method->summary
+                    .($method->is_default ? ' (predeterminado)' : ''),
+            ])
+            ->all();
     }
 }

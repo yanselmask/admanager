@@ -2179,6 +2179,13 @@ html[data-theme='dark'] .moreno-page .grad-text-rev {
     line-height: 1.65;
 }
 
+.moreno-invoice-method {
+    display: block;
+    margin-top: 0.35rem;
+    color: var(--ms-muted);
+    font-size: 0.78rem;
+}
+
 .moreno-payment-method-list {
     display: grid;
     gap: 0.65rem;
