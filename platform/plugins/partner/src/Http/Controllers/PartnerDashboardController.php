@@ -8,6 +8,7 @@ use Botble\Partner\Forms\PartnerSettingForm;
 use Botble\Partner\Services\PartnerEarningService;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class PartnerDashboardController extends BaseController
@@ -48,8 +49,12 @@ class PartnerDashboardController extends BaseController
         ]);
     }
 
-    public function domains(Request $request): View
+    public function domains(Request $request): View|RedirectResponse
     {
+        if (! setting('domains_partner', true)) {
+            return redirect()->route('partner.dashboard');
+        }
+
         $partner = $this->partner();
         $period = $this->earnings->resolvePeriod($request->query('period'));
         $networks = $this->earnings->networksOf($partner);

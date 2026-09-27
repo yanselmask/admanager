@@ -9,7 +9,7 @@
                 <tr>
                     <th>{{ trans('plugins/partner::partner.networks.network_name') }}</th>
                     <th>{{ trans('plugins/partner::partner.networks.network_code') }}</th>
-                    <th class="num">{{ trans('plugins/partner::partner.networks.domains_count') }}</th>
+                    @if($visibleMetrics['domains'] ?? true)<th class="num">{{ trans('plugins/partner::partner.networks.domains_count') }}</th>@endif
                     @if($visibleMetrics['earning'])<th class="num">{{ trans('plugins/partner::partner.dashboard.earning') }}</th>@endif
                     @if($visibleMetrics['impressions'])<th class="num">{{ trans('plugins/partner::partner.dashboard.impressions') }}</th>@endif
                     @if($visibleMetrics['clicks'])<th class="num">{{ trans('plugins/partner::partner.dashboard.clicks') }}</th>@endif
@@ -22,7 +22,7 @@
                     <tr>
                         <td>{{ $row['network']->network_name }}</td>
                         <td>{{ $row['network']->network_code }}</td>
-                        <td class="num">{{ $row['domains_count'] }}</td>
+                        @if($visibleMetrics['domains'] ?? true)<td class="num">{{ $row['domains_count'] }}</td>@endif
                         @if($visibleMetrics['earning'])<td class="num">{{ number_format($row['metrics']->earning, 2) }}</td>@endif
                         @if($visibleMetrics['impressions'])<td class="num">{{ number_format($row['metrics']->impressions) }}</td>@endif
                         @if($visibleMetrics['clicks'])<td class="num">{{ number_format($row['metrics']->clicks) }}</td>@endif

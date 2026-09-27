@@ -25,7 +25,7 @@
                     <thead>
                         <tr>
                             <th scope="col">Cuenta</th>
-                            <th scope="col">Dominios</th>
+                            @if($visibleMetrics['domains'] ?? true)<th scope="col">Dominios</th>@endif
                             @if($visibleMetrics['earning'] ?? true)<th scope="col">Ganancias</th>@endif
                             @if($visibleMetrics['impressions'] ?? true)<th scope="col">Impresiones</th>@endif
                             @if($visibleMetrics['clicks'] ?? true)<th scope="col">Clicks</th>@endif
@@ -42,7 +42,7 @@
                                         <span>{{ $row['network']->network_code }}</span>
                                     </div>
                                 </td>
-                                <td data-label="Dominios">{{ $row['domains_count'] }}</td>
+                                @if($visibleMetrics['domains'] ?? true)<td data-label="Dominios">{{ $row['domains_count'] }}</td>@endif
                                 @if($visibleMetrics['earning'] ?? true)<td data-label="Ganancias"><strong class="moreno-invoice-amount">${{ number_format($row['metrics']->earning, 2) }}</strong></td>@endif
                                 @if($visibleMetrics['impressions'] ?? true)<td data-label="Impresiones">{{ number_format($row['metrics']->impressions) }}</td>@endif
                                 @if($visibleMetrics['clicks'] ?? true)<td data-label="Clicks">{{ number_format($row['metrics']->clicks) }}</td>@endif

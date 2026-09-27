@@ -92,6 +92,16 @@ class PartnerServiceProvider extends ServiceProvider
             ]);
 
             DashboardMenu::registerItem([
+                'id' => 'cms-plugins-partner-list',
+                'priority' => 5,
+                'parent_id' => 'cms-plugins-partner',
+                'name' => 'plugins/partner::partner.name',
+                'icon' => 'ti ti-users',
+                'url' => route('partner.index'),
+                'permissions' => ['partner.index'],
+            ]);
+
+            DashboardMenu::registerItem([
                 'id' => 'cms-plugins-partner-networks',
                 'priority' => 10,
                 'parent_id' => 'cms-plugins-partner',
@@ -163,15 +173,20 @@ class PartnerServiceProvider extends ServiceProvider
                         ->name('plugins/partner::partner.dashboard.accounts')
                         ->url(fn () => route('partner.accounts'))
                         ->icon('ti ti-briefcase')
-                )
-                ->registerItem(
-                    DashboardMenuItem::make()
-                        ->id('cms-partner-domains')
-                        ->priority(30)
-                        ->name('plugins/partner::partner.dashboard.domains')
-                        ->url(fn () => route('partner.domains'))
-                        ->icon('ti ti-world')
                 );
+
+            if (! setting('domains_partner', true)) {
+                return;
+            }
+
+            DashboardMenu::make()->registerItem(
+                DashboardMenuItem::make()
+                    ->id('cms-partner-domains')
+                    ->priority(30)
+                    ->name('plugins/partner::partner.dashboard.domains')
+                    ->url(fn () => route('partner.domains'))
+                    ->icon('ti ti-world')
+            );
         });
     }
 }

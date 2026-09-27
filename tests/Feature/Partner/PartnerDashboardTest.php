@@ -29,7 +29,7 @@ class PartnerDashboardTest extends TestCase
 
     protected function tearDown(): void
     {
-        foreach (['partner_earning_base', 'percentage_default', 'admanager_networks', 'ecpms_partner', 'clicks_partner', 'theme'] as $key) {
+        foreach (['partner_earning_base', 'percentage_default', 'admanager_networks', 'ecpms_partner', 'clicks_partner', 'domains_partner', 'theme'] as $key) {
             Setting::forget($key);
         }
 
@@ -189,6 +189,57 @@ class PartnerDashboardTest extends TestCase
             ->get(route('partner.dashboard'))
             ->assertOk()
             ->assertDontSee(trans('plugins/partner::partner.dashboard.ecpm'));
+    }
+
+    public function test_the_admin_can_hide_the_domains_from_the_panel(): void
+    {
+        $partner = $this->partnerWith('123456');
+        $domainsColumn = '<th class="num">'.trans('plugins/partner::partner.networks.domains_count').'</th>';
+
+        $this->actingAs($partner, 'member')
+            ->get(route('partner.accounts'))
+            ->assertOk()
+            ->assertSee($domainsColumn, false);
+
+        Setting::set('domains_partner', false)->save();
+
+        $this->actingAs($partner, 'member')
+            ->get(route('partner.accounts'))
+            ->assertOk()
+            ->assertDontSee($domainsColumn, false);
+
+        $this->actingAs($partner, 'member')
+            ->get(route('partner.domains'))
+            ->assertRedirect(route('partner.dashboard'));
+    }
+
+    public function test_hidden_domains_drop_out_of_the_partner_menu(): void
+    {
+        Setting::set('domains_partner', false)->save();
+
+        $this->assertNotContains('cms-partner-domains', $this->menuFor($this->partnerWith('123456')));
+    }
+
+    public function test_the_admin_menu_links_to_the_partner_list(): void
+    {
+        $admin = \Botble\ACL\Models\User::query()->forceCreate([
+            'first_name' => 'Test',
+            'last_name' => 'Admin',
+            'username' => 'admin_'.uniqid(),
+            'email' => uniqid().'@example.test',
+            'password' => 'secret-password',
+        ]);
+        $admin->forceFill(['super_user' => true])->save();
+
+        $this->actingAs($admin);
+
+        $items = collect(\Botble\Base\Facades\DashboardMenu::getAll())
+            ->firstWhere('id', 'cms-plugins-partner')['children'] ?? [];
+
+        $this->assertSame(
+            ['cms-plugins-partner-list', 'cms-plugins-partner-networks'],
+            collect($items)->pluck('id')->values()->all()
+        );
     }
 
     // --- Aislamiento ------------------------------------------------------------------------

@@ -16,9 +16,10 @@ class PartnerSettingForm extends SettingForm
 {
     /**
      * Métricas del panel del partner y su setting de visibilidad. Todas vienen
-     * activadas por defecto: un panel recién configurado muestra las cinco.
+     * activadas por defecto: un panel recién configurado lo muestra todo.
      */
     public const METRICS = [
+        'domains_partner' => 'dashboard.domains',
         'earning_partner' => 'dashboard.earning',
         'impressions_partner' => 'dashboard.impressions',
         'clicks_partner' => 'dashboard.clicks',

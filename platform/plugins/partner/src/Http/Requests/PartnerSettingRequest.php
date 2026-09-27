@@ -16,6 +16,7 @@ class PartnerSettingRequest extends Request
                 'required',
                 Rule::in([PartnerEarningService::BASE_PLATFORM_NET, PartnerEarningService::BASE_GROSS]),
             ],
+            'domains_partner' => ['nullable'],
             'earning_partner' => ['nullable'],
             'impressions_partner' => ['nullable'],
             'clicks_partner' => ['nullable'],
