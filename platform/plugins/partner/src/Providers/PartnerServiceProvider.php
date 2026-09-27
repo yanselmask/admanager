@@ -148,42 +148,51 @@ class PartnerServiceProvider extends ServiceProvider
     protected function registerPartnerPanelMenu(): void
     {
         DashboardMenu::for('member')->beforeRetrieving(function (): void {
-            if (! PartnerHelper::isPartner(auth('member')->user())) {
+            $member = auth('member')->user();
+
+            if (! PartnerHelper::isPartner($member)) {
                 return;
             }
 
-            DashboardMenu::make()
-                ->removeItem([
+            // Si además es creador, sus entradas de creador se quedan y las de partner
+            // van debajo con nombres propios para no confundirlas.
+            $isAlsoCreator = PartnerHelper::ownsCreatorSites($member);
+
+            if (! $isAlsoCreator) {
+                DashboardMenu::make()->removeItem([
                     'cms-member-dashboard',
                     'cms-member-referrals',
                     'cms-member-invoices',
-                ])
+                ]);
+            }
+
+            DashboardMenu::make()
                 ->registerItem(
                     DashboardMenuItem::make()
                         ->id('cms-partner-dashboard')
-                        ->priority(10)
-                        ->name('plugins/partner::partner.dashboard.title')
+                        ->priority($isAlsoCreator ? 35 : 10)
+                        ->name($isAlsoCreator ? 'Panel de partner' : 'plugins/partner::partner.dashboard.title')
                         ->url(fn () => route('partner.dashboard'))
                         ->icon('ti ti-chart-bar')
                 )
                 ->registerItem(
                     DashboardMenuItem::make()
                         ->id('cms-partner-accounts')
-                        ->priority(20)
-                        ->name('plugins/partner::partner.dashboard.accounts')
+                        ->priority($isAlsoCreator ? 36 : 20)
+                        ->name($isAlsoCreator ? 'Cuentas de partner' : 'plugins/partner::partner.dashboard.accounts')
                         ->url(fn () => route('partner.accounts'))
                         ->icon('ti ti-briefcase')
                 );
 
-            if (! PartnerHelper::visibleMetrics(auth('member')->user())['domains']) {
+            if (! PartnerHelper::visibleMetrics($member)['domains']) {
                 return;
             }
 
             DashboardMenu::make()->registerItem(
                 DashboardMenuItem::make()
                     ->id('cms-partner-domains')
-                    ->priority(30)
-                    ->name('plugins/partner::partner.dashboard.domains')
+                    ->priority($isAlsoCreator ? 37 : 30)
+                    ->name($isAlsoCreator ? 'Dominios de partner' : 'plugins/partner::partner.dashboard.domains')
                     ->url(fn () => route('partner.domains'))
                     ->icon('ti ti-world')
             );

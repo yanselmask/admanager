@@ -68,6 +68,35 @@ class PartnerAccessTest extends TestCase
             ->assertOk();
     }
 
+    public function test_a_partner_that_also_owns_sites_keeps_its_creator_panel(): void
+    {
+        $partner = $this->partner();
+        $this->ownSite($partner);
+
+        foreach (['public.member.dashboard', 'public.member.referrals', 'public.member.invoices'] as $route) {
+            $this->actingAs($partner, 'member')
+                ->get(route($route))
+                ->assertOk();
+        }
+
+        $this->actingAs($partner, 'member')
+            ->get(route('partner.dashboard'))
+            ->assertOk();
+    }
+
+    public function test_a_partner_that_also_owns_sites_sees_both_menus(): void
+    {
+        $partner = $this->partner();
+        $this->ownSite($partner);
+
+        $this->actingAs($partner, 'member');
+        $items = collect(\Botble\Base\Facades\DashboardMenu::getAll('member'))->pluck('id')->all();
+
+        foreach (['cms-member-dashboard', 'cms-member-referrals', 'cms-member-invoices', 'cms-partner-dashboard', 'cms-partner-accounts'] as $id) {
+            $this->assertContains($id, $items);
+        }
+    }
+
     public function test_a_creator_keeps_reaching_its_own_dashboard(): void
     {
         $this->actingAs($this->creator(), 'member')
@@ -118,6 +147,16 @@ class PartnerAccessTest extends TestCase
             'email' => uniqid().'@example.test',
             'password' => 'secret-password',
             'role' => $role,
+        ]);
+    }
+
+    protected function ownSite(Member $member): void
+    {
+        \Botble\Domain\Models\Domain::query()->forceCreate([
+            'name' => 'propio.test',
+            'url' => uniqid().'-propio.test',
+            'network_code' => '555555',
+            'member_id' => $member->getKey(),
         ]);
     }
 

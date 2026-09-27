@@ -41,7 +41,9 @@ class RedirectPartnerToOwnPanel
             return $next($request);
         }
 
-        if (! PartnerHelper::isPartner(Auth::guard('member')->user())) {
+        $member = Auth::guard('member')->user();
+
+        if (! PartnerHelper::isPartner($member) || PartnerHelper::ownsCreatorSites($member)) {
             return $next($request);
         }
 

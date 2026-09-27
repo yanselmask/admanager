@@ -2,6 +2,7 @@
 
 namespace Botble\Partner\Supports;
 
+use Botble\Domain\Models\Domain;
 use Botble\Member\Models\Member;
 use Botble\Partner\Enums\PartnerRoleEnum;
 use Botble\Partner\Forms\PartnerSettingForm;
@@ -17,6 +18,19 @@ class PartnerHelper
     public static function isCreator(?Member $member): bool
     {
         return $member !== null && ! self::isPartner($member);
+    }
+
+    /**
+     * Un partner que además tiene sitios propios como creador conserva su panel de
+     * creador: el de partner se le suma en lugar de sustituirlo.
+     */
+    public static function ownsCreatorSites(?Member $member): bool
+    {
+        if (! $member?->getKey()) {
+            return false;
+        }
+
+        return Domain::query()->where('member_id', $member->getKey())->exists();
     }
 
     /**
