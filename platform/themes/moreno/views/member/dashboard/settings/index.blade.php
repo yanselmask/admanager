@@ -167,7 +167,6 @@
                 phone: 'Teléfono',
                 dob: 'Fecha de nacimiento',
                 gender: 'Género',
-                payment_method_default: 'Método de pago',
                 description: 'Descripción',
                 old_password: 'Contraseña actual',
                 password: 'Nueva contraseña',

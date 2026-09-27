@@ -189,6 +189,15 @@ class PaymentMethodTest extends TestCase
         $this->assertSame(PaymentMethodController::MAX_METHODS, $member->paymentMethods()->count());
     }
 
+    public function test_the_profile_form_no_longer_sends_the_legacy_payment_field(): void
+    {
+        // `payment_method_default` no tiene columna en `members`: guardarlo tumbaba el formulario.
+        $this->actingAs($this->member(), 'member')
+            ->get(route('public.member.settings'))
+            ->assertOk()
+            ->assertDontSee('name="payment_method_default"', false);
+    }
+
     public function test_a_guest_is_sent_to_the_login(): void
     {
         $this->post(route('public.member.payment-methods.store'), ['type' => 'paypal', 'email' => 'cobros@example.test'])
