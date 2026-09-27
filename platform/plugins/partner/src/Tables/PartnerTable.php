@@ -50,7 +50,6 @@ class PartnerTable extends TableAbstract
             ->queryUsing(function (Builder $query) {
                 $query
                     ->where('role', PartnerRoleEnum::PARTNER)
-                    ->withCount('partnerNetworks')
                     ->select([
                         'id',
                         'first_name',
@@ -58,7 +57,8 @@ class PartnerTable extends TableAbstract
                         'email',
                         'commission',
                         'created_at',
-                    ]);
+                    ])
+                    ->withCount('partnerNetworks');
             });
     }
 }

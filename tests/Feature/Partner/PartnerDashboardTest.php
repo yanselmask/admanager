@@ -354,6 +354,21 @@ class PartnerDashboardTest extends TestCase
             ->assertViewHas('selectedSite', null);
     }
 
+    public function test_the_admin_partner_list_counts_the_assigned_networks(): void
+    {
+        $partner = $this->partnerWith('123456');
+        $this->network($partner, '789012');
+
+        $response = $this->actingAs($this->admin())
+            ->postJson(route('partner.index'), ['draw' => 1, 'start' => 0, 'length' => 50], ['X-Requested-With' => 'XMLHttpRequest'])
+            ->assertOk();
+
+        $row = collect($response->json('data'))->firstWhere('id', $partner->getKey());
+
+        $this->assertNotNull($row);
+        $this->assertEquals(2, $row['partner_networks_count']);
+    }
+
     public function test_the_admin_menu_links_to_the_partner_list(): void
     {
         $this->actingAs($this->admin());
