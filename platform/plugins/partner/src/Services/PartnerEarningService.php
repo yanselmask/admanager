@@ -46,6 +46,18 @@ class PartnerEarningService
     ];
 
     /**
+     * Periodos que se ofrecen en el panel del partner: los mismos que el panel de
+     * creadores (sin semana pasada). `PERIODS` sigue aceptando el resto para el cálculo.
+     */
+    public const PANEL_PERIODS = [
+        'today',
+        'yesterday',
+        'this_week',
+        'this_month',
+        'last_month',
+    ];
+
+    /**
      * Columnas mínimas necesarias para el cálculo. Traer `select *` arrastraría
      * todas las columnas JSON de cada dominio sin usarlas.
      */
@@ -169,7 +181,7 @@ class PartnerEarningService
     }
 
     /**
-     * Serie de una métrica a lo largo de todos los periodos, cargando los dominios
+     * Serie de una métrica a lo largo de los periodos del panel, cargando los dominios
      * una sola vez en lugar de una consulta por periodo. Con `$domains` se limita
      * a esos dominios (el filtro por sitio del panel).
      *
@@ -181,7 +193,7 @@ class PartnerEarningService
         $networks = $this->networksOf($partner);
 
         if ($networks->isEmpty()) {
-            return array_fill_keys(self::PERIODS, 0.0);
+            return array_fill_keys(self::PANEL_PERIODS, 0.0);
         }
 
         $domains ??= $this->domainsOf($networks->keys()->all());
@@ -189,7 +201,7 @@ class PartnerEarningService
 
         $series = [];
 
-        foreach (self::PERIODS as $period) {
+        foreach (self::PANEL_PERIODS as $period) {
             $series[$period] = $this->aggregate($partner, $networks, $domains, $period, $ownership)->{$metric};
         }
 

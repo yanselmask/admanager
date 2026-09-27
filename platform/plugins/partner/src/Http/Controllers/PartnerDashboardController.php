@@ -18,7 +18,7 @@ class PartnerDashboardController extends BaseController
     public function index(Request $request): View
     {
         $partner = $this->partner();
-        $period = $this->earnings->resolvePeriod($request->query('period'));
+        $period = $this->panelPeriod($request);
         $networks = $this->earnings->networksOf($partner);
         $visibleMetrics = PartnerHelper::visibleMetrics($partner);
 
@@ -31,7 +31,7 @@ class PartnerDashboardController extends BaseController
         return $this->view('index', [
             'partner' => $partner,
             'period' => $period,
-            'periods' => PartnerEarningService::PERIODS,
+            'periods' => PartnerEarningService::PANEL_PERIODS,
             'metrics' => $scope
                 ? $this->earnings->forDomains($partner, $scope, $period, $networks)
                 : $this->earnings->forPartner($partner, $period),
@@ -46,14 +46,14 @@ class PartnerDashboardController extends BaseController
     public function accounts(Request $request): View
     {
         $partner = $this->partner();
-        $period = $this->earnings->resolvePeriod($request->query('period'));
+        $period = $this->panelPeriod($request);
 
         $this->pageTitle(trans('plugins/partner::partner.dashboard.accounts'));
 
         return $this->view('accounts', [
             'partner' => $partner,
             'period' => $period,
-            'periods' => PartnerEarningService::PERIODS,
+            'periods' => PartnerEarningService::PANEL_PERIODS,
             'accounts' => $this->earnings->byNetwork($partner, $period),
             'visibleMetrics' => PartnerHelper::visibleMetrics($partner),
         ]);
@@ -67,7 +67,7 @@ class PartnerDashboardController extends BaseController
             return redirect()->route('partner.dashboard');
         }
 
-        $period = $this->earnings->resolvePeriod($request->query('period'));
+        $period = $this->panelPeriod($request);
         $networks = $this->earnings->networksOf($partner);
         $selected = $this->selectedNetwork($request);
 
@@ -81,7 +81,7 @@ class PartnerDashboardController extends BaseController
         return $this->view('domains', [
             'partner' => $partner,
             'period' => $period,
-            'periods' => PartnerEarningService::PERIODS,
+            'periods' => PartnerEarningService::PANEL_PERIODS,
             'networks' => $networks,
             'selectedNetwork' => $selected,
             'domains' => $domains,
@@ -126,6 +126,16 @@ class PartnerDashboardController extends BaseController
         $owned = array_map('strval', $ownedCodes);
 
         return in_array($selected, $owned, true) ? [$selected] : [];
+    }
+
+    /**
+     * Periodo pedido en la URL, limitado a los que ofrece el panel.
+     */
+    protected function panelPeriod(Request $request): string
+    {
+        $period = (string) $request->query('period');
+
+        return in_array($period, PartnerEarningService::PANEL_PERIODS, true) ? $period : PartnerEarningService::DEFAULT_PERIOD;
     }
 
     /**

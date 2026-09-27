@@ -369,6 +369,18 @@ class PartnerDashboardTest extends TestCase
         $this->assertEquals(2, $row['partner_networks_count']);
     }
 
+    public function test_the_panel_offers_the_same_periods_as_the_creator_panel(): void
+    {
+        $partner = $this->partnerWith('123456');
+
+        $response = $this->actingAs($partner, 'member')->get(route('partner.dashboard', ['period' => 'last_week']));
+
+        $response->assertOk()
+            ->assertViewHas('periods', ['today', 'yesterday', 'this_week', 'this_month', 'last_month'])
+            ->assertViewHas('period', 'today')
+            ->assertViewHas('series', fn (array $series) => array_keys($series) === ['today', 'yesterday', 'this_week', 'this_month', 'last_month']);
+    }
+
     public function test_the_admin_menu_links_to_the_partner_list(): void
     {
         $this->actingAs($this->admin());
