@@ -21,15 +21,18 @@ class PartnerMetrics
      * Construye las métricas a partir de los totales agregados. El CTR y el eCPM se
      * derivan aquí, sobre las sumas, y nunca promediando los valores por dominio:
      * el promedio por dominio es incorrecto cuando los volúmenes son dispares.
+     *
+     * La comisión del partner solo recorta `$earning`. El eCPM se calcula sobre
+     * `$revenue`, el ingreso bruto de los sitios, para mostrar su rendimiento real.
      */
-    public static function fromTotals(float $earning, float $impressions, float $clicks): self
+    public static function fromTotals(float $earning, float $impressions, float $clicks, float $revenue = 0.0): self
     {
         return new self(
             earning: $earning,
             impressions: $impressions,
             clicks: $clicks,
             ctr: $impressions > 0 ? ($clicks / $impressions) * 100 : 0.0,
-            ecpm: $impressions > 0 ? ($earning / $impressions) * 1000 : 0.0,
+            ecpm: $impressions > 0 ? ($revenue / $impressions) * 1000 : 0.0,
         );
     }
 

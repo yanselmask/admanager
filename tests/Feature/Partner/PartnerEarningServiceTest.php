@@ -130,13 +130,13 @@ class PartnerEarningServiceTest extends TestCase
         $this->assertEqualsWithDelta(2.50, $this->service->forPartner($partner, 'today')->ctr, 0.0001);
     }
 
-    public function test_the_ecpm_is_derived_from_the_partner_earning(): void
+    public function test_the_ecpm_is_the_real_one_of_the_sites_not_the_partner_cut(): void
     {
         $partner = $this->partnerWithNetwork('100010', partnerCommission: 10);
         $this->domain('100010', earnings: 100_000_000, commissions: 60, commissionsNetwork: 15, impressions: 10000);
 
-        // ganancia 4.50 sobre 10.000 impresiones -> 0.45 por mil
-        $this->assertEqualsWithDelta(0.45, $this->service->forPartner($partner, 'today')->ecpm, 0.0001);
+        // 100 de ingreso bruto sobre 10.000 impresiones -> 10 por mil, sea cual sea la comisión.
+        $this->assertEqualsWithDelta(10.00, $this->service->forPartner($partner, 'today')->ecpm, 0.0001);
     }
 
     public function test_zero_impressions_do_not_divide_by_zero(): void
@@ -253,6 +253,23 @@ class PartnerEarningServiceTest extends TestCase
     }
 
     // --- Utilidades ---------------------------------------------------------------------
+
+    public function test_the_partner_commission_only_cuts_the_earnings(): void
+    {
+        $this->useBase(PartnerEarningService::BASE_GROSS);
+
+        $partner = $this->partnerWithNetwork('100050', partnerCommission: 2);
+        // 50 unidades de ingreso bruto en 10.000 impresiones: eCPM real de 5.
+        $this->domain('100050', earnings: 50_000_000, impressions: 10000, clicks: 400);
+
+        $metrics = $this->service->forPartner($partner, 'today');
+
+        $this->assertEqualsWithDelta(1.00, $metrics->earning, 0.0001);
+        $this->assertEqualsWithDelta(5.00, $metrics->ecpm, 0.0001);
+        $this->assertEquals(10000, $metrics->impressions);
+        $this->assertEquals(400, $metrics->clicks);
+        $this->assertEqualsWithDelta(4.00, $metrics->ctr, 0.0001);
+    }
 
     // --- Traspaso de una network a partir de una fecha --------------------------------
 

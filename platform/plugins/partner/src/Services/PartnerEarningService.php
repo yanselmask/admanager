@@ -290,6 +290,7 @@ class PartnerEarningService
     protected function aggregate(Member $partner, Collection $networks, iterable $domains, string $period, Collection $ownership): PartnerMetrics
     {
         $earning = 0.0;
+        $revenue = 0.0;
         $impressions = 0.0;
         $clicks = 0.0;
 
@@ -299,11 +300,12 @@ class PartnerEarningService
             }
 
             $earning += $this->earningOf($domain, $partner, $networks->get($domain->network_code), $period);
+            $revenue += $this->valueOf($domain->earnings, $period) / self::MICROS;
             $impressions += $this->valueOf($domain->impressions, $period);
             $clicks += $this->valueOf($domain->clicks, $period);
         }
 
-        return PartnerMetrics::fromTotals($earning, $impressions, $clicks);
+        return PartnerMetrics::fromTotals($earning, $impressions, $clicks, $revenue);
     }
 
     /**
