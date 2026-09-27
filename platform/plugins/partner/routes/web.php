@@ -18,12 +18,12 @@ AdminHelper::registerRoutes(function (): void {
     Route::group(['prefix' => 'settings', 'as' => 'partner.'], function (): void {
         Route::get('partners', [
             'as' => 'settings',
-            'uses' => [PartnerSettingController::class, 'edit'],
+            'uses' => PartnerSettingController::class.'@edit',
         ]);
 
         Route::put('partners', [
             'as' => 'settings.update',
-            'uses' => [PartnerSettingController::class, 'update'],
+            'uses' => PartnerSettingController::class.'@update',
             'permission' => 'partner.settings',
         ]);
     });
