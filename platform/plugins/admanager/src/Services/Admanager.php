@@ -117,7 +117,8 @@ class Admanager
             $this->session,
             dateCsv: $this->dateCsv,
             dateRangeType: $this->dateRangeType,
-            column: $this->column
+            column: $this->column,
+            networkCode: $this->networkCode ?? null
         );
     }
 
@@ -127,6 +128,7 @@ class Admanager
         string $dateCsv,
         string $dateRangeType,
         string $column,
+        ?string $networkCode = null,
     ) {
         $reportService = $serviceFactory->createReportService($session);
         // Create report query.
@@ -191,7 +193,7 @@ class Admanager
 
             unlink($gzFile);
 
-            self::updateEarning($csvFile, $column);
+            self::updateEarning($csvFile, $column, $networkCode);
         }
     }
 
@@ -221,7 +223,14 @@ class Admanager
         );
     }
 
-    public static function updateEarning($csvFile, $column)
+    /**
+     * Vuelca un reporte de Ad Manager en `domains`. Con `$networkCode`:
+     * - los sitios que todavía no existen se dan de alta en esa network sin creador
+     *   asignado, para que sus datos no se pierdan y el admin pueda asignarlos después;
+     * - los sitios de esa network que no vienen en el reporte (sin tráfico en el periodo)
+     *   quedan a 0 en ese periodo, en lugar de conservar el valor de una ejecución anterior.
+     */
+    public static function updateEarning($csvFile, $column, ?string $networkCode = null)
     {
         if (! file_exists($csvFile)) {
             throw new \Exception("El archivo CSV no existe: $csvFile");
@@ -229,9 +238,11 @@ class Admanager
 
         if (($handle = fopen($csvFile, 'r')) !== false) {
             $headers = fgetcsv($handle, 1000, ',');
+            $reportedUrls = [];
 
             while (($data = fgetcsv($handle, 1000, ',')) !== false) {
                 $domainName = trim($data[0]);
+                $reportedUrls[] = $domainName;
                 $valueImpressions = floatval($data[1]);
                 $valueClicks = floatval($data[2]);
                 $valueCtrs = floatval($data[3]);
@@ -240,6 +251,15 @@ class Admanager
 
                 if (is_plugin_active('domain')) {
                     $domain = Domain::where('url', $domainName)->first();
+
+                    if (! $domain && $networkCode && $domainName !== '') {
+                        $domain = Domain::query()->create([
+                            'name' => $domainName,
+                            'url' => $domainName,
+                            'network_code' => $networkCode,
+                        ]);
+                    }
+
                     if ($domain) {
                         $impressions = $domain->impressions ?? [];
                         $clicks = $domain->clicks ?? [];
@@ -264,7 +284,30 @@ class Admanager
             }
 
             fclose($handle);
+
+            if ($networkCode && is_plugin_active('domain')) {
+                self::resetMissingSites($networkCode, $column, $reportedUrls);
+            }
         }
+    }
+
+    /**
+     * @param  array<int, string>  $reportedUrls
+     */
+    protected static function resetMissingSites(string $networkCode, string $column, array $reportedUrls): void
+    {
+        Domain::query()
+            ->where('network_code', $networkCode)
+            ->whereNotIn('url', $reportedUrls)
+            ->each(function (Domain $domain) use ($column): void {
+                foreach (['impressions', 'clicks', 'ctrs', 'earnings', 'ecpms'] as $metric) {
+                    $values = $domain->{$metric} ?? [];
+                    $values[$column] = 0;
+                    $domain->{$metric} = $values;
+                }
+
+                $domain->save();
+            });
     }
 
     protected static function evaluateDate($dateRangeType)
