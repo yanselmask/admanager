@@ -17,6 +17,100 @@
             </div>
         </section>
 
+        @php
+            $paymentTypes = \Botble\Member\Enums\PaymentMethodType::cases();
+            $selectedPaymentType = old('type', $paymentTypes[0]->value);
+            $canAddPaymentMethod = $paymentMethods->count() < \Botble\Member\Http\Controllers\PaymentMethodController::MAX_METHODS;
+        @endphp
+
+        <section class="moreno-invoices-panel moreno-payment-methods" id="metodos-de-pago" aria-labelledby="moreno-payment-methods-title">
+            <div class="moreno-invoices-panel-heading">
+                <div>
+                    <span class="moreno-invoices-section-label">Cómo quieres cobrar</span>
+                    <h2 id="moreno-payment-methods-title">Métodos de pago</h2>
+                </div>
+            </div>
+
+            @if($paymentMethods->isNotEmpty())
+                <ul class="moreno-payment-method-list">
+                    @foreach($paymentMethods as $paymentMethod)
+                        <li @class(['moreno-payment-method', 'is-default' => $paymentMethod->is_default])>
+                            <span class="moreno-payment-method-icon" aria-hidden="true"><span class="{{ $paymentMethod->type->icon() }}"></span></span>
+                            <div class="moreno-payment-method-body">
+                                <strong>{{ $paymentMethod->type->label() }}</strong>
+                                <span>{{ $paymentMethod->summary }}</span>
+                            </div>
+                            <div class="moreno-payment-method-actions">
+                                @if($paymentMethod->is_default)
+                                    <span class="moreno-payment-method-badge">Predeterminado</span>
+                                @else
+                                    <form method="POST" action="{{ route('public.member.payment-methods.default', $paymentMethod->getKey()) }}">
+                                        @csrf
+                                        <button type="submit" class="moreno-payment-method-link">Usar este</button>
+                                    </form>
+                                @endif
+                                <form method="POST" action="{{ route('public.member.payment-methods.destroy', $paymentMethod->getKey()) }}" onsubmit="return confirm('¿Eliminar este método de pago?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="moreno-payment-method-remove" aria-label="Eliminar {{ $paymentMethod->type->label() }}">
+                                        <span class="fas fa-trash-alt" aria-hidden="true"></span>
+                                    </button>
+                                </form>
+                            </div>
+                        </li>
+                    @endforeach
+                </ul>
+            @else
+                <p class="moreno-payment-methods-empty">Aún no tienes métodos de pago. Agrega uno para que sepamos dónde enviarte tus ingresos.</p>
+            @endif
+
+            @if($canAddPaymentMethod)
+                <details class="moreno-payment-method-add" @if($errors->any() || $paymentMethods->isEmpty()) open @endif>
+                    <summary><span class="fas fa-plus" aria-hidden="true"></span> Agregar método de pago</summary>
+
+                    <form method="POST" action="{{ route('public.member.payment-methods.store') }}" class="moreno-payment-method-form" data-payment-method-form>
+                        @csrf
+
+                        <label class="moreno-payment-field">
+                            <span>Tipo</span>
+                            <select name="type" data-payment-method-type required>
+                                @foreach($paymentTypes as $paymentType)
+                                    <option value="{{ $paymentType->value }}" @selected($selectedPaymentType === $paymentType->value)>{{ $paymentType->label() }}</option>
+                                @endforeach
+                            </select>
+                        </label>
+
+                        @foreach($paymentTypes as $paymentType)
+                            <fieldset class="moreno-payment-method-fields" data-payment-method-fields="{{ $paymentType->value }}" @if($selectedPaymentType !== $paymentType->value) hidden disabled @endif>
+                                @foreach($paymentType->fields() as $fieldName => $field)
+                                    <label class="moreno-payment-field">
+                                        <span>{{ $field['label'] }}</span>
+                                        <input
+                                            type="{{ $fieldName === 'email' ? 'email' : 'text' }}"
+                                            name="{{ $fieldName }}"
+                                            value="{{ $selectedPaymentType === $paymentType->value ? old($fieldName) : '' }}"
+                                            placeholder="{{ $field['placeholder'] }}"
+                                            autocomplete="off"
+                                            @if(in_array('required', $field['rules'], true)) required @endif
+                                        >
+                                    </label>
+                                @endforeach
+                            </fieldset>
+                        @endforeach
+
+                        @if($paymentMethods->isNotEmpty())
+                            <label class="moreno-payment-default">
+                                <input type="checkbox" name="is_default" value="1" @checked(old('is_default'))>
+                                <span>Usarlo como método predeterminado</span>
+                            </label>
+                        @endif
+
+                        <button type="submit" class="moreno-dashboard-action">Guardar método</button>
+                    </form>
+                </details>
+            @endif
+        </section>
+
         @if($invoices->count())
             <section class="moreno-invoices-panel" aria-labelledby="moreno-invoices-title">
                 <div class="moreno-invoices-panel-heading">
@@ -101,3 +195,23 @@
         @endif
     </div>
 @stop
+
+@push('scripts')
+    <script>
+        document.querySelectorAll('[data-payment-method-form]').forEach(function (form) {
+            var typeSelect = form.querySelector('[data-payment-method-type]');
+
+            function showFieldsFor(type) {
+                form.querySelectorAll('[data-payment-method-fields]').forEach(function (fieldset) {
+                    var isActive = fieldset.dataset.paymentMethodFields === type;
+                    fieldset.hidden = !isActive;
+                    fieldset.disabled = !isActive;
+                });
+            }
+
+            typeSelect.addEventListener('change', function () {
+                showFieldsFor(typeSelect.value);
+            });
+        });
+    </script>
+@endpush

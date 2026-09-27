@@ -2179,6 +2179,221 @@ html[data-theme='dark'] .moreno-page .grad-text-rev {
     line-height: 1.65;
 }
 
+.moreno-payment-method-list {
+    display: grid;
+    gap: 0.65rem;
+    margin: 0 0 1rem;
+    padding: 0;
+    list-style: none;
+}
+
+.moreno-payment-method {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--ms-border);
+    border-radius: 0.9rem;
+    background: var(--ms-surface-raised);
+}
+
+.moreno-payment-method.is-default {
+    border-color: rgba(var(--ms-brand-bright-rgb), 0.55);
+    background: color-mix(in srgb, var(--ms-surface-muted) 55%, var(--ms-surface));
+}
+
+.moreno-payment-method-icon {
+    display: grid;
+    width: 2.5rem;
+    height: 2.5rem;
+    flex: 0 0 2.5rem;
+    place-items: center;
+    border-radius: 0.7rem;
+    background: rgba(var(--ms-brand-bright-rgb), 0.14);
+    color: var(--ms-brand-bright);
+    font-size: 1.05rem;
+}
+
+.moreno-payment-method-body {
+    display: flex;
+    min-width: 0;
+    flex: 1;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.moreno-payment-method-body strong {
+    color: var(--ms-text);
+    font-size: 0.95rem;
+}
+
+.moreno-payment-method-body span {
+    overflow: hidden;
+    color: var(--ms-muted);
+    font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.moreno-payment-method-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.moreno-payment-method-actions form {
+    margin: 0;
+}
+
+.moreno-payment-method-badge {
+    padding: 0.3rem 0.6rem;
+    border-radius: 999px;
+    background: rgba(var(--ms-brand-bright-rgb), 0.16);
+    color: var(--ms-brand-bright);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+
+.moreno-payment-method-link,
+.moreno-payment-method-remove {
+    border: 1px solid var(--ms-border);
+    border-radius: 0.6rem;
+    background: transparent;
+    color: var(--ms-text);
+    cursor: pointer;
+    transition: border-color 160ms ease, color 160ms ease;
+}
+
+.moreno-payment-method-link {
+    padding: 0.4rem 0.7rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.moreno-payment-method-remove {
+    display: grid;
+    width: 2.1rem;
+    height: 2.1rem;
+    place-items: center;
+    color: var(--ms-muted);
+}
+
+.moreno-payment-method-link:hover,
+.moreno-payment-method-link:focus-visible {
+    border-color: var(--ms-brand-bright);
+    color: var(--ms-brand-bright);
+}
+
+.moreno-payment-method-remove:hover,
+.moreno-payment-method-remove:focus-visible {
+    border-color: var(--ms-danger);
+    color: var(--ms-danger);
+}
+
+.moreno-payment-methods-empty {
+    margin: 0 0 1rem;
+    color: var(--ms-muted);
+    line-height: 1.6;
+}
+
+.moreno-payment-method-add {
+    border: 1px dashed var(--ms-border);
+    border-radius: 0.9rem;
+}
+
+.moreno-payment-method-add summary {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.85rem 1rem;
+    color: var(--ms-brand-bright);
+    font-weight: 700;
+    cursor: pointer;
+    list-style: none;
+}
+
+.moreno-payment-method-add summary::-webkit-details-marker {
+    display: none;
+}
+
+.moreno-payment-method-form {
+    display: grid;
+    gap: 0.85rem;
+    padding: 0 1rem 1rem;
+}
+
+.moreno-payment-method-fields {
+    display: grid;
+    gap: 0.85rem;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    min-width: 0;
+}
+
+.moreno-payment-method-fields[hidden] {
+    display: none;
+}
+
+.moreno-payment-field {
+    display: grid;
+    gap: 0.35rem;
+    margin: 0;
+}
+
+.moreno-payment-field span {
+    color: var(--ms-text);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.moreno-payment-field input,
+.moreno-payment-field select {
+    width: 100%;
+    padding: 0.65rem 0.8rem;
+    border: 1px solid var(--ms-border);
+    border-radius: 0.65rem;
+    background: var(--ms-surface-raised);
+    color: var(--ms-text);
+    font-size: 0.95rem;
+}
+
+.moreno-payment-field input:focus,
+.moreno-payment-field select:focus {
+    border-color: var(--ms-brand-bright);
+    outline: 2px solid rgba(var(--ms-brand-bright-rgb), 0.25);
+    outline-offset: 1px;
+}
+
+.moreno-payment-default {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    color: var(--ms-text);
+    font-size: 0.9rem;
+}
+
+.moreno-payment-method-form .moreno-dashboard-action {
+    justify-self: start;
+    cursor: pointer;
+}
+
+@media (max-width: 575.98px) {
+    .moreno-payment-method {
+        flex-wrap: wrap;
+    }
+
+    .moreno-payment-method-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}
+
 .moreno-invoices-pagination {
     margin-top: 1rem;
 }

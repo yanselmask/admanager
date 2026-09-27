@@ -510,7 +510,8 @@ class PublicController extends BaseController
         $this->pageTitle(__('Pagos'));
         $user = auth('member')->user();
         $invoices = Invoice::query()->where('member_id', auth('member')->id())->latest()->paginate();
+        $paymentMethods = $user->paymentMethods()->get();
 
-        return view(Theme::getThemeNamespace('views.member.dashboard.invoices'), compact('user', 'invoices'));
+        return view(Theme::getThemeNamespace('views.member.dashboard.invoices'), compact('user', 'invoices', 'paymentMethods'));
     }
 }

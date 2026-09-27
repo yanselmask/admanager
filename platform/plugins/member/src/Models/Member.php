@@ -18,6 +18,8 @@ use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Notifications\Notifiable;
@@ -27,16 +29,13 @@ use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
 use Throwable;
 
-class Member extends BaseModel implements
-    AuthenticatableContract,
-    AuthorizableContract,
-    CanResetPasswordContract
+class Member extends BaseModel implements AuthenticatableContract, AuthorizableContract, CanResetPasswordContract
 {
     use Authenticatable;
     use Authorizable;
     use CanResetPassword;
-    use MustVerifyEmail;
     use HasApiTokens;
+    use MustVerifyEmail;
     use Notifiable;
 
     protected $table = 'members';
@@ -54,7 +53,7 @@ class Member extends BaseModel implements
         'phone',
         'description',
         'gender',
-        'status'
+        'status',
     ];
 
     protected $hidden = [
@@ -75,7 +74,7 @@ class Member extends BaseModel implements
     {
         static::deleting(function (Member $account): void {
             $folder = Storage::path($account->upload_folder);
-            if (File::isDirectory($folder) && Str::endsWith($account->upload_folder, '/' . $account->getKey())) {
+            if (File::isDirectory($folder) && Str::endsWith($account->upload_folder, '/'.$account->getKey())) {
                 File::deleteDirectory($folder);
             }
         });
@@ -88,7 +87,7 @@ class Member extends BaseModel implements
 
     public function sendEmailVerificationNotification(): void
     {
-        $this->notify(new ConfirmEmailNotification());
+        $this->notify(new ConfirmEmailNotification);
     }
 
     public function avatar(): BelongsTo
@@ -123,7 +122,7 @@ class Member extends BaseModel implements
 
     protected function name(): Attribute
     {
-        return Attribute::get(fn () => trim($this->first_name . ' ' . $this->last_name));
+        return Attribute::get(fn () => trim($this->first_name.' '.$this->last_name));
     }
 
     protected function avatarUrl(): Attribute
@@ -160,7 +159,7 @@ class Member extends BaseModel implements
     {
         return Attribute::make(
             get: function () {
-                $folder = $this->getKey() ? 'members/' . $this->getKey() : 'members';
+                $folder = $this->getKey() ? 'members/'.$this->getKey() : 'members';
 
                 return apply_filters('member_account_upload_folder', $folder, $this);
             }
@@ -180,6 +179,18 @@ class Member extends BaseModel implements
     public function invoices()
     {
         return $this->hasMany(Invoice::class);
+    }
+
+    public function paymentMethods(): HasMany
+    {
+        return $this->hasMany(MemberPaymentMethod::class)
+            ->orderByDesc('is_default')
+            ->latest();
+    }
+
+    public function defaultPaymentMethod(): HasOne
+    {
+        return $this->hasOne(MemberPaymentMethod::class)->where('is_default', true);
     }
 
     public function getTotalMonthInvoicesAttribute(): ?int

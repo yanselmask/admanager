@@ -52,7 +52,7 @@ if (defined('THEME_MODULE_SCREEN_NAME')) {
 
         Route::group([
             'namespace' => 'Botble\Member\Http\Controllers',
-            'middleware' => ['web', 'core', 'member','member.kyc.not'],
+            'middleware' => ['web', 'core', 'member', 'member.kyc.not'],
             'as' => 'public.member.',
         ], function (): void {
             Route::group([
@@ -74,6 +74,23 @@ if (defined('THEME_MODULE_SCREEN_NAME')) {
                     'as' => 'invoices',
                     'uses' => 'PublicController@getInvoices',
                 ]);
+
+                Route::group(['prefix' => 'payment-methods', 'as' => 'payment-methods.'], function (): void {
+                    Route::post('', [
+                        'as' => 'store',
+                        'uses' => 'PaymentMethodController@store',
+                    ]);
+
+                    Route::post('{id}/default', [
+                        'as' => 'default',
+                        'uses' => 'PaymentMethodController@makeDefault',
+                    ])->whereNumber('id');
+
+                    Route::delete('{id}', [
+                        'as' => 'destroy',
+                        'uses' => 'PaymentMethodController@destroy',
+                    ])->whereNumber('id');
+                });
 
                 Route::get('settings', [
                     'as' => 'settings',
@@ -105,7 +122,6 @@ if (defined('THEME_MODULE_SCREEN_NAME')) {
                     'uses' => 'PublicController@postAvatar',
                 ]);
             });
-
 
             Route::group(['prefix' => 'ajax/members'], function (): void {
                 Route::get('activity-logs', [
@@ -143,7 +159,7 @@ if (defined('THEME_MODULE_SCREEN_NAME')) {
 
         Route::group([
             'namespace' => 'Botble\Member\Http\Controllers',
-            'middleware' => ['web', 'core', 'member','member.kyc'],
+            'middleware' => ['web', 'core', 'member', 'member.kyc'],
             'as' => 'public.member.',
         ], function (): void {
             Route::group([

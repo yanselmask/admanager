@@ -55,6 +55,19 @@ class InvoiceTable extends TableAbstract
                     ->getValueUsing(function (FormattedColumn $column) {
                         return optional($column->getItem()->member)->first_name.' '.optional($column->getItem()->member)->last_name;
                     }),
+                FormattedColumn::make('payment_method')
+                    ->label('Método de pago')
+                    ->orderable(false)
+                    ->searchable(false)
+                    ->getValueUsing(function (FormattedColumn $column) {
+                        $method = $column->getItem()->member?->defaultPaymentMethod;
+
+                        if (! $method) {
+                            return '<span class="text-muted">Sin método</span>';
+                        }
+
+                        return '<strong>'.e($method->type->label()).'</strong><br><small>'.e(implode(' · ', $method->details ?? [])).'</small>';
+                    }),
                 FormattedColumn::make('status')
                     ->label(__('Status'))
                     ->getValueUsing(function (FormattedColumn $column) {
@@ -91,7 +104,7 @@ class InvoiceTable extends TableAbstract
                     'member_id',
                     'created_at',
                     'status',
-                ])->with('metadata', 'member');
+                ])->with('metadata', 'member.defaultPaymentMethod');
             });
     }
 }
