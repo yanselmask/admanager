@@ -65,7 +65,11 @@ if(!function_exists('get_currency_code'))
 
         if($code)
         {
-            return $all[$code];
+            return $all[$code] ?? [
+                'code' => $code,
+                'name' => $code,
+                'symbol' => $code === 'USD' ? '$' : $code,
+            ];
         }
 
         return $all;
