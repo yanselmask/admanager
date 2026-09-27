@@ -158,11 +158,13 @@ class PartnerEarningService
 
     /**
      * Serie de una métrica a lo largo de todos los periodos, cargando los dominios
-     * una sola vez en lugar de una consulta por periodo.
+     * una sola vez en lugar de una consulta por periodo. Con `$domains` se limita
+     * a esos dominios (el filtro por sitio del panel).
      *
+     * @param  iterable<Domain>|null  $domains
      * @return array<string, float>
      */
-    public function seriesFor(Member $partner, string $metric = 'earning'): array
+    public function seriesFor(Member $partner, string $metric = 'earning', ?iterable $domains = null): array
     {
         $networks = $this->networksOf($partner);
 
@@ -170,7 +172,7 @@ class PartnerEarningService
             return array_fill_keys(self::PERIODS, 0.0);
         }
 
-        $domains = $this->domainsOf($networks->keys()->all());
+        $domains ??= $this->domainsOf($networks->keys()->all());
 
         $series = [];
 

@@ -1,5 +1,20 @@
 @extends('theme.moreno::views.partner.dashboard._shell')
 
+@section('filters')
+    @if($sites->isNotEmpty())
+        <form method="GET" class="moreno-analytics-control moreno-analytics-control--domain">
+            <label for="partner-site">Dominio</label>
+            <input type="hidden" name="period" value="{{ $period }}">
+            <select id="partner-site" name="domain" class="form-select moreno-analytics-select" onchange="this.form.submit()">
+                <option value="">Todos los dominios</option>
+                @foreach($sites as $site)
+                    <option value="{{ $site->url }}" @selected($selectedSite?->url === $site->url)>{{ $site->name ?: $site->url }}</option>
+                @endforeach
+            </select>
+        </form>
+    @endif
+@endsection
+
 @section('panel')
     @if($networks->isEmpty())
         <section class="moreno-dashboard-welcome mb-4">

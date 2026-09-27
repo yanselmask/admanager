@@ -311,6 +311,49 @@ class PartnerDashboardTest extends TestCase
             ->assertSessionHasErrors('visibility_domains_partner');
     }
 
+    public function test_the_dashboard_can_be_narrowed_to_one_site(): void
+    {
+        $partner = $this->partnerWith('123456', commission: 10);
+        $first = $this->domain('123456', earnings: 100_000_000, impressions: 1000, url: 'uno.test');
+        $this->domain('123456', earnings: 300_000_000, impressions: 3000, url: 'dos.test');
+
+        $all = $this->actingAs($partner, 'member')->get(route('partner.dashboard'));
+        $all->assertOk()->assertViewHas('sites', fn ($sites) => $sites->count() === 2);
+        $this->assertEquals(4000, $all->viewData('metrics')->impressions);
+
+        $one = $this->actingAs($partner, 'member')->get(route('partner.dashboard', ['domain' => $first->url]));
+        $one->assertOk()->assertViewHas('selectedSite', fn ($site) => $site?->is($first));
+        $this->assertEquals(1000, $one->viewData('metrics')->impressions);
+        $this->assertEquals(4.5, $one->viewData('metrics')->earning);
+        $this->assertEquals(4.5, $one->viewData('series')['today']);
+    }
+
+    public function test_a_site_outside_the_partner_networks_is_ignored(): void
+    {
+        $partner = $this->partnerWith('123456');
+        $this->domain('123456', impressions: 1000, url: 'propio.test');
+        $foreign = $this->domain('999999', impressions: 5000, url: 'ajeno.test');
+
+        $response = $this->actingAs($partner, 'member')->get(route('partner.dashboard', ['domain' => $foreign->url]));
+
+        $response->assertOk()->assertViewHas('selectedSite', null);
+        $this->assertEquals(1000, $response->viewData('metrics')->impressions);
+    }
+
+    public function test_the_site_filter_is_not_offered_when_domains_are_hidden(): void
+    {
+        Setting::set('domains_partner', false)->save();
+
+        $partner = $this->partnerWith('123456');
+        $site = $this->domain('123456', impressions: 1000, url: 'uno.test');
+
+        $this->actingAs($partner, 'member')
+            ->get(route('partner.dashboard', ['domain' => $site->url]))
+            ->assertOk()
+            ->assertViewHas('sites', fn ($sites) => $sites->isEmpty())
+            ->assertViewHas('selectedSite', null);
+    }
+
     public function test_the_admin_menu_links_to_the_partner_list(): void
     {
         $this->actingAs($this->admin());

@@ -19,6 +19,12 @@ class PartnerDashboardController extends BaseController
     {
         $partner = $this->partner();
         $period = $this->earnings->resolvePeriod($request->query('period'));
+        $networks = $this->earnings->networksOf($partner);
+        $visibleMetrics = PartnerHelper::visibleMetrics($partner);
+
+        $sites = $visibleMetrics['domains'] ? $this->earnings->domainsOf($networks->keys()->all()) : collect();
+        $selectedSite = $sites->firstWhere('url', (string) $request->query('domain'));
+        $scope = $selectedSite ? collect([$selectedSite]) : null;
 
         $this->pageTitle(trans('plugins/partner::partner.dashboard.title'));
 
@@ -26,10 +32,14 @@ class PartnerDashboardController extends BaseController
             'partner' => $partner,
             'period' => $period,
             'periods' => PartnerEarningService::PERIODS,
-            'metrics' => $this->earnings->forPartner($partner, $period),
-            'networks' => $this->earnings->networksOf($partner),
-            'visibleMetrics' => PartnerHelper::visibleMetrics($partner),
-            'series' => $this->earnings->seriesFor($partner),
+            'metrics' => $scope
+                ? $this->earnings->forDomains($partner, $scope, $period, $networks)
+                : $this->earnings->forPartner($partner, $period),
+            'networks' => $networks,
+            'visibleMetrics' => $visibleMetrics,
+            'series' => $this->earnings->seriesFor($partner, domains: $scope),
+            'sites' => $sites,
+            'selectedSite' => $selectedSite,
         ]);
     }
 
