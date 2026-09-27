@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Member;
 
+use Botble\ACL\Models\User;
 use Botble\Member\Enums\PaymentMethodType;
 use Botble\Member\Http\Controllers\PaymentMethodController;
 use Botble\Member\Models\Member;
@@ -198,6 +199,44 @@ class PaymentMethodTest extends TestCase
             ->assertDontSee('name="payment_method_default"', false);
     }
 
+    public function test_the_admin_sees_every_payment_method_with_full_details_on_the_member(): void
+    {
+        $member = $this->member();
+        $this->paymentMethod($member, PaymentMethodType::USDT_TRC20, ['wallet' => self::TRC20_WALLET], true);
+        $this->paymentMethod($member, PaymentMethodType::BANK, [
+            'bank_name' => 'Banco Popular',
+            'account_holder' => 'Test Creator',
+            'account_number' => '000123456789',
+        ]);
+
+        $this->actingAs($this->admin())
+            ->get(route('member.edit', $member->getKey()))
+            ->assertOk()
+            ->assertSee('Métodos de pago')
+            ->assertSee(self::TRC20_WALLET)
+            ->assertSee('000123456789')
+            ->assertSee('Predeterminado');
+    }
+
+    public function test_the_admin_is_told_when_the_member_has_no_payment_methods(): void
+    {
+        $this->actingAs($this->admin())
+            ->get(route('member.edit', $this->member()->getKey()))
+            ->assertOk()
+            ->assertSee('Este miembro aún no ha registrado métodos de pago.');
+    }
+
+    public function test_the_creator_settings_page_does_not_show_the_admin_box(): void
+    {
+        $member = $this->member();
+        $this->paymentMethod($member, PaymentMethodType::USDT_TRC20, ['wallet' => self::TRC20_WALLET], true);
+
+        $this->actingAs($member, 'member')
+            ->get(route('public.member.settings'))
+            ->assertOk()
+            ->assertDontSee(self::TRC20_WALLET);
+    }
+
     public function test_a_guest_is_sent_to_the_login(): void
     {
         $this->post(route('public.member.payment-methods.store'), ['type' => 'paypal', 'email' => 'cobros@example.test'])
@@ -213,6 +252,20 @@ class PaymentMethodTest extends TestCase
             'email' => uniqid().'@example.test',
             'password' => 'secret-password',
         ]);
+    }
+
+    protected function admin(): User
+    {
+        $admin = User::query()->forceCreate([
+            'first_name' => 'Test',
+            'last_name' => 'Admin',
+            'username' => 'admin_'.uniqid(),
+            'email' => uniqid().'@example.test',
+            'password' => 'secret-password',
+        ]);
+        $admin->forceFill(['super_user' => true])->save();
+
+        return $admin;
     }
 
     /**

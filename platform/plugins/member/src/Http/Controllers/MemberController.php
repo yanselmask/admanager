@@ -74,6 +74,14 @@ class MemberController extends BaseController
         $member->password = null;
 
         return MemberForm::createFromModel($member)
+            ->addMetaBoxes([
+                'payment_methods' => [
+                    'title' => 'Métodos de pago',
+                    'content' => view('plugins/member::payment-methods', [
+                        'paymentMethods' => $member->paymentMethods()->get(),
+                    ])->render(),
+                ],
+            ])
             ->renderForm();
     }
 
