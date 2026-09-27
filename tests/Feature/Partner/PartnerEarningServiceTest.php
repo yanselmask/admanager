@@ -9,6 +9,7 @@ use Botble\Partner\Models\PartnerNetwork;
 use Botble\Partner\Services\PartnerEarningService;
 use Botble\Setting\Facades\Setting;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Carbon;
 use Tests\TestCase;
 
 class PartnerEarningServiceTest extends TestCase
@@ -31,6 +32,7 @@ class PartnerEarningServiceTest extends TestCase
         Setting::forget('partner_earning_base');
         Setting::forget('percentage_default');
         Setting::forget('partner_percentage_default');
+        Carbon::setTestNow();
 
         parent::tearDown();
     }
@@ -252,6 +254,79 @@ class PartnerEarningServiceTest extends TestCase
 
     // --- Utilidades ---------------------------------------------------------------------
 
+    // --- Traspaso de una network a partir de una fecha --------------------------------
+
+    public function test_a_handover_splits_the_periods_between_the_old_and_the_new_owner(): void
+    {
+        Carbon::setTestNow('2026-09-26 10:00:00');
+
+        $previous = $this->partnerWithNetwork('300001');
+        $current = $this->partner();
+        $this->network($current, '300001', startsAt: '2026-09-01');
+        $this->domainWithPeriods('300001', [
+            'today' => 10,
+            'yesterday' => 20,
+            'this_month' => 300,
+            'last_month' => 400,
+            'last_3_months' => 900,
+            'this_year' => 5000,
+        ]);
+
+        $impressions = fn (Member $partner, string $period) => $this->service->forPartner($partner, $period)->impressions;
+
+        $this->assertEquals(10, $impressions($current, 'today'));
+        $this->assertEquals(20, $impressions($current, 'yesterday'));
+        $this->assertEquals(300, $impressions($current, 'this_month'));
+        $this->assertEquals(0, $impressions($current, 'last_month'));
+        $this->assertEquals(0, $impressions($current, 'this_year'));
+
+        $this->assertEquals(0, $impressions($previous, 'today'));
+        $this->assertEquals(0, $impressions($previous, 'this_month'));
+        $this->assertEquals(400, $impressions($previous, 'last_month'));
+        $this->assertEquals(900, $impressions($previous, 'last_3_months'));
+        $this->assertEquals(0, $impressions($previous, 'this_year'));
+    }
+
+    public function test_a_period_that_crosses_the_handover_date_counts_for_nobody(): void
+    {
+        Carbon::setTestNow('2026-09-26 10:00:00');
+
+        $previous = $this->partnerWithNetwork('300002');
+        $current = $this->partner();
+        $this->network($current, '300002', startsAt: '2026-09-15');
+        $this->domainWithPeriods('300002', ['today' => 10, 'this_month' => 300]);
+
+        $this->assertEquals(10, $this->service->forPartner($current, 'today')->impressions);
+        $this->assertEquals(0, $this->service->forPartner($current, 'this_month')->impressions);
+        $this->assertEquals(0, $this->service->forPartner($previous, 'this_month')->impressions);
+    }
+
+    public function test_a_general_assignment_owns_every_period(): void
+    {
+        Carbon::setTestNow('2026-09-26 10:00:00');
+
+        $partner = $this->partnerWithNetwork('300003');
+        $this->domainWithPeriods('300003', ['today' => 10, 'last_3_months' => 900, 'this_year' => 5000]);
+
+        $this->assertEquals(10, $this->service->forPartner($partner, 'today')->impressions);
+        $this->assertEquals(900, $this->service->forPartner($partner, 'last_3_months')->impressions);
+        $this->assertEquals(5000, $this->service->forPartner($partner, 'this_year')->impressions);
+    }
+
+    public function test_an_assignment_starting_in_the_future_owns_nothing_yet(): void
+    {
+        Carbon::setTestNow('2026-09-26 10:00:00');
+
+        $previous = $this->partnerWithNetwork('300004');
+        $upcoming = $this->partner();
+        $this->network($upcoming, '300004', startsAt: '2026-10-01');
+        $this->domainWithPeriods('300004', ['today' => 10, 'this_month' => 300]);
+
+        $this->assertEquals(0, $this->service->forPartner($upcoming, 'today')->impressions);
+        $this->assertEquals(10, $this->service->forPartner($previous, 'today')->impressions);
+        $this->assertEquals(300, $this->service->forPartner($previous, 'this_month')->impressions);
+    }
+
     protected function useBase(string $base): void
     {
         Setting::set('partner_earning_base', $base)->save();
@@ -278,12 +353,28 @@ class PartnerEarningServiceTest extends TestCase
         return $partner;
     }
 
-    protected function network(Member $partner, string $networkCode, ?float $commission = null): PartnerNetwork
+    protected function network(Member $partner, string $networkCode, ?float $commission = null, ?string $startsAt = null): PartnerNetwork
     {
         return PartnerNetwork::query()->create([
             'member_id' => $partner->getKey(),
             'network_code' => $networkCode,
             'commission' => $commission,
+            'starts_at' => $startsAt,
+        ]);
+    }
+
+    /**
+     * @param  array<string, int>  $impressions
+     */
+    protected function domainWithPeriods(string $networkCode, array $impressions): Domain
+    {
+        return Domain::query()->forceCreate([
+            'name' => 'periods.test',
+            'url' => uniqid().'-periods.test',
+            'network_code' => $networkCode,
+            'impressions' => $impressions,
+            'earnings' => [],
+            'clicks' => [],
         ]);
     }
 

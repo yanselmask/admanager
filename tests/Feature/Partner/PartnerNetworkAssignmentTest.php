@@ -9,7 +9,6 @@ use Botble\Partner\Http\Requests\PartnerNetworkRequest;
 use Botble\Partner\Http\Requests\PartnerRequest;
 use Botble\Partner\Models\PartnerNetwork;
 use Botble\Setting\Facades\Setting;
-use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Validator;
 use Tests\TestCase;
@@ -114,16 +113,41 @@ class PartnerNetworkAssignmentTest extends TestCase
         $this->assertContains($domain->url, $second->partnerDomains()->pluck('url')->all());
     }
 
-    public function test_the_database_rejects_a_duplicated_network_code(): void
+    public function test_the_database_keeps_several_assignments_of_a_network_over_time(): void
     {
         $this->network($this->partner(), '123456');
-
-        $this->expectException(QueryException::class);
 
         PartnerNetwork::query()->create([
             'member_id' => $this->partner()->getKey(),
             'network_code' => '123456',
+            'starts_at' => '2026-09-01',
         ]);
+
+        $this->assertSame(2, PartnerNetwork::query()->where('network_code', '123456')->count());
+    }
+
+    public function test_a_network_can_be_handed_over_from_a_date(): void
+    {
+        $this->network($this->partner(firstName: 'Ana'), '123456');
+
+        $validator = $this->networkValidator($this->partner(firstName: 'Beto'), '123456', startsAt: '2026-09-01');
+
+        $this->assertTrue($validator->passes());
+    }
+
+    public function test_two_assignments_of_a_network_cannot_start_the_same_day(): void
+    {
+        $owner = $this->partner(firstName: 'Ana');
+        PartnerNetwork::query()->create([
+            'member_id' => $owner->getKey(),
+            'network_code' => '123456',
+            'starts_at' => '2026-09-01',
+        ]);
+
+        $validator = $this->networkValidator($this->partner(firstName: 'Beto'), '123456', startsAt: '2026-09-01');
+
+        $this->assertTrue($validator->fails());
+        $this->assertStringContainsString('Ana', $validator->errors()->first('network_code'));
     }
 
     public function test_editing_an_assignment_does_not_collide_with_itself(): void
@@ -197,9 +221,10 @@ class PartnerNetworkAssignmentTest extends TestCase
 
     // --- Utilidades -------------------------------------------------------------------------
 
-    protected function networkValidator(Member $member, string $networkCode, ?int $currentId = null): \Illuminate\Validation\Validator
+    protected function networkValidator(Member $member, string $networkCode, ?int $currentId = null, ?string $startsAt = null): \Illuminate\Validation\Validator
     {
         $request = new PartnerNetworkRequest;
+        $request->merge(['starts_at' => $startsAt]);
 
         if ($currentId !== null) {
             $request->setRouteResolver(fn () => new class($currentId)
@@ -216,6 +241,7 @@ class PartnerNetworkAssignmentTest extends TestCase
         return Validator::make([
             'member_id' => $member->getKey(),
             'network_code' => $networkCode,
+            'starts_at' => $startsAt,
         ], $request->rules());
     }
 

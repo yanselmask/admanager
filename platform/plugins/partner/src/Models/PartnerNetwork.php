@@ -17,6 +17,7 @@ class PartnerNetwork extends BaseModel
     protected $fillable = [
         'member_id',
         'network_code',
+        'starts_at',
         'commission',
         'status',
     ];
@@ -24,6 +25,7 @@ class PartnerNetwork extends BaseModel
     protected $casts = [
         'status' => BaseStatusEnum::class,
         'commission' => 'float',
+        'starts_at' => 'date',
     ];
 
     public function member(): BelongsTo

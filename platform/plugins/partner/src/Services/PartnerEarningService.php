@@ -7,6 +7,8 @@ use Botble\Member\Models\Member;
 use Botble\Partner\Data\PartnerMetrics;
 use Botble\Partner\Models\PartnerNetwork;
 use Botble\Partner\Supports\PartnerHelper;
+use Carbon\CarbonImmutable;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
@@ -69,7 +71,13 @@ class PartnerEarningService
             return PartnerMetrics::zero();
         }
 
-        return $this->aggregate($partner, $networks, $this->domainsOf($networks->keys()->all()), $period);
+        return $this->aggregate(
+            $partner,
+            $networks,
+            $this->domainsOf($networks->keys()->all()),
+            $period,
+            $this->ownershipOf($partner, $networks->keys()->all())
+        );
     }
 
     /**
@@ -88,13 +96,14 @@ class PartnerEarningService
         }
 
         $domainsByNetwork = $this->domainsOf($networks->keys()->all())->groupBy('network_code');
+        $ownership = $this->ownershipOf($partner, $networks->keys()->all());
 
-        return $networks->map(function (PartnerNetwork $network) use ($partner, $domainsByNetwork, $period) {
+        return $networks->map(function (PartnerNetwork $network) use ($partner, $domainsByNetwork, $period, $ownership) {
             $domains = $domainsByNetwork->get($network->network_code, collect());
 
             return [
                 'network' => $network,
-                'metrics' => $this->aggregate($partner, collect([$network->network_code => $network]), $domains, $period),
+                'metrics' => $this->aggregate($partner, collect([$network->network_code => $network]), $domains, $period, $ownership),
                 'domains_count' => $domains->count(),
             ];
         });
@@ -148,11 +157,14 @@ class PartnerEarningService
      */
     public function forDomains(Member $partner, iterable $domains, ?string $period = null, ?Collection $networks = null): PartnerMetrics
     {
+        $networks ??= $this->networksOf($partner);
+
         return $this->aggregate(
             $partner,
-            $networks ?? $this->networksOf($partner),
+            $networks,
             $domains,
-            $this->resolvePeriod($period)
+            $this->resolvePeriod($period),
+            $this->ownershipOf($partner, $networks->keys()->all())
         );
     }
 
@@ -173,27 +185,119 @@ class PartnerEarningService
         }
 
         $domains ??= $this->domainsOf($networks->keys()->all());
+        $ownership = $this->ownershipOf($partner, $networks->keys()->all());
 
         $series = [];
 
         foreach (self::PERIODS as $period) {
-            $series[$period] = $this->aggregate($partner, $networks, $domains, $period)->{$metric};
+            $series[$period] = $this->aggregate($partner, $networks, $domains, $period, $ownership)->{$metric};
         }
 
         return $series;
     }
 
     /**
+     * Tramos en que el partner es dueño de cada network, como pares [inicio, fin): una
+     * asignación empieza en su `starts_at` (`null` = desde siempre) y termina donde
+     * empieza la siguiente asignación de esa misma network, sea de quien sea.
+     *
+     * @param  array<int, string>  $networkCodes
+     * @return Collection<string, array<int, array{0: ?CarbonInterface, 1: ?CarbonInterface}>>
+     */
+    public function ownershipOf(Member $partner, array $networkCodes): Collection
+    {
+        if ($networkCodes === []) {
+            return collect();
+        }
+
+        return PartnerNetwork::query()
+            ->whereIn('network_code', $networkCodes)
+            ->orderByRaw('starts_at IS NOT NULL')
+            ->orderBy('starts_at')
+            ->orderBy('id')
+            ->get(['id', 'member_id', 'network_code', 'starts_at'])
+            ->groupBy('network_code')
+            ->map(function (Collection $assignments) use ($partner): array {
+                $assignments = $assignments->values();
+                $windows = [];
+
+                foreach ($assignments as $index => $assignment) {
+                    if ((int) $assignment->member_id !== (int) $partner->getKey()) {
+                        continue;
+                    }
+
+                    $windows[] = [$assignment->starts_at, $assignments->get($index + 1)?->starts_at];
+                }
+
+                return $windows;
+            });
+    }
+
+    /**
+     * Fechas que cubre cada periodo, alineadas con lo que `generate:report` pide a Ad Manager:
+     * las claves pasan en mayúsculas por `Admanager::evaluateDate` o, si no las define,
+     * como `DateRangeType` de Google (LAST_WEEK, LAST_MONTH y LAST_3_MONTHS son periodos
+     * completos que terminan antes del actual).
+     *
+     * @return array{0: CarbonImmutable, 1: CarbonImmutable}
+     */
+    public function periodRange(string $period): array
+    {
+        $today = CarbonImmutable::today();
+
+        return match ($period) {
+            'yesterday' => [$today->subDay(), $today->subDay()],
+            'this_week' => [$today->startOfWeek((int) setting('week_start', CarbonInterface::MONDAY)), $today],
+            'last_week' => [$today->startOfWeek(CarbonInterface::MONDAY)->subWeek(), $today->startOfWeek(CarbonInterface::MONDAY)->subDay()],
+            'this_month' => [$today->startOfMonth(), $today],
+            'last_month' => [$today->subMonthNoOverflow()->startOfMonth(), $today->subMonthNoOverflow()->endOfMonth()->startOfDay()],
+            'last_2_months' => [$today->subMonthsNoOverflow(2)->startOfMonth(), $today],
+            'last_3_months' => [$today->subMonthsNoOverflow(3)->startOfMonth(), $today->subMonthNoOverflow()->endOfMonth()->startOfDay()],
+            'last_6_months' => [$today->subMonthsNoOverflow(6)->startOfMonth(), $today],
+            'last_9_months' => [$today->subMonthsNoOverflow(9)->startOfMonth(), $today],
+            'this_year' => [$today->startOfYear(), $today],
+            default => [$today, $today],
+        };
+    }
+
+    /**
+     * Un periodo solo cuenta para el partner si cae entero dentro de uno de sus tramos.
+     * Los datos de Ad Manager llegan sumados por periodo, sin detalle diario, así que un
+     * periodo que cruza la fecha de un cambio de dueño no se puede repartir: no cuenta
+     * para ninguno de los dos.
+     *
+     * @param  array<int, array{0: ?CarbonInterface, 1: ?CarbonInterface}>  $windows
+     */
+    public function ownsPeriod(array $windows, string $period): bool
+    {
+        [$from, $to] = $this->periodRange($period);
+
+        foreach ($windows as [$start, $end]) {
+            if (($start === null || $from->gte($start->copy()->startOfDay()))
+                && ($end === null || $to->lt($end->copy()->startOfDay()))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * @param  Collection<string, PartnerNetwork>  $networks
      * @param  iterable<Domain>  $domains
+     * @param  Collection<string, array<int, array{0: ?CarbonInterface, 1: ?CarbonInterface}>>  $ownership
      */
-    protected function aggregate(Member $partner, Collection $networks, iterable $domains, string $period): PartnerMetrics
+    protected function aggregate(Member $partner, Collection $networks, iterable $domains, string $period, Collection $ownership): PartnerMetrics
     {
         $earning = 0.0;
         $impressions = 0.0;
         $clicks = 0.0;
 
         foreach ($domains as $domain) {
+            if (! $this->ownsPeriod($ownership->get($domain->network_code, []), $period)) {
+                continue;
+            }
+
             $earning += $this->earningOf($domain, $partner, $networks->get($domain->network_code), $period);
             $impressions += $this->valueOf($domain->impressions, $period);
             $clicks += $this->valueOf($domain->clicks, $period);

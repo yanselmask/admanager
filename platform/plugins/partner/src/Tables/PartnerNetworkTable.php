@@ -37,6 +37,9 @@ class PartnerNetworkTable extends TableAbstract
                 FormattedColumn::make('network_code_raw')
                     ->label(trans('plugins/partner::partner.networks.network_code'))
                     ->getValueUsing(fn (FormattedColumn $column) => $column->getItem()->network_code),
+                FormattedColumn::make('starts_at')
+                    ->label('Desde')
+                    ->getValueUsing(fn (FormattedColumn $column) => $column->getItem()->starts_at?->format('d/m/Y') ?? 'Siempre'),
                 FormattedColumn::make('commission')
                     ->label(trans('plugins/partner::partner.networks.commission'))
                     ->getValueUsing(function (FormattedColumn $column) {
@@ -59,6 +62,7 @@ class PartnerNetworkTable extends TableAbstract
                         'id',
                         'member_id',
                         'network_code',
+                        'starts_at',
                         'commission',
                         'status',
                         'created_at',

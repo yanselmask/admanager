@@ -2,9 +2,11 @@
 
 namespace Botble\Partner\Forms;
 
+use Botble\Base\Forms\FieldOptions\DatePickerFieldOption;
 use Botble\Base\Forms\FieldOptions\SelectFieldOption;
 use Botble\Base\Forms\FieldOptions\StatusFieldOption;
 use Botble\Base\Forms\FieldOptions\TextFieldOption;
+use Botble\Base\Forms\Fields\DatePickerField;
 use Botble\Base\Forms\Fields\SelectField;
 use Botble\Base\Forms\Fields\TextField;
 use Botble\Base\Forms\FormAbstract;
@@ -39,6 +41,13 @@ class PartnerNetworkForm extends FormAbstract
                     ->searchable()
                     ->required()
                     ->helperText(trans('plugins/partner::partner.networks.network_code_helper'))
+            )
+            ->add(
+                'starts_at',
+                DatePickerField::class,
+                DatePickerFieldOption::make()
+                    ->label('Desde')
+                    ->helperText('Vacío = asignación general, desde siempre. Con fecha, el partner cuenta desde ese día y quien tuviera antes la cuenta conserva lo anterior. Los datos de Ad Manager van por periodos: un periodo que cruza la fecha no cuenta para ninguno de los dos.')
             )
             ->add(
                 'commission',
